@@ -1,0 +1,43 @@
+GitHub:提供Git仓库托管服务。
+
+git config --global user.name "aaron.zeng"
+git config --global user.email "aaron.zeng@wtmec.com"
+
+
+1.创建SSH key
+  在用户的主目录下，看看有没有.ssh目录。
+  如果没有，则需要安装ssh。
+  如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件。
+  没有需要创建：
+    ssh-keygen -t rsa -C "aaron.zeng@wtmec.com"
+  顺利的话，会在~/.ssh/下生成id_rsa和id_rsa.pub这两个ssh密钥对。
+  id_rsa是私钥，不能泄漏。id_rsa.pub是公钥，可以告诉别人。
+
+2.登录github，在右上角头像上单击，下划至setting，单击，在页面左侧
+  “SSH and GPG keys”，有两个keys需要添加。
+  暂时先加一个SSH key：
+
+   sudo apt-get install xclip         //安装剪贴板
+   xclip -sel clip < ~/.ssh/id_rsa.pub//将公钥复制到剪贴板上
+  粘贴到SSH and GPG keys的SSH 框内。
+  验证一下ssh的连通性：
+   ssh -T git@github.com
+
+3.从远程库克隆到本地：
+ git clone git@github.com:aaronsky-zeng/gitskills.git
+
+4.基本操作：
+	cd gitskills/
+	vim README.md	//修改文件
+	
+	git status	//查看改动的文件
+	git add .	//将修改后的文件添加到库中
+		----此时如想反悔，git reset HEAD filename。如果是多个文件都想反悔，将filename
+			改为 “.”
+	git commit -m "rewrite readme,redirect this git as Docs for install/compile imx,s32v"
+			//对修改的内容做一个简单的说明
+	git branch -a	//查看分支
+	git push -u origin master //将本地库中修改推送到远程库.第一次推送-u。
+ 
+5.git pull --rebase origin master
+将GitHub库里的文件下载到本地。
