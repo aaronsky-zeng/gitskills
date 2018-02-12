@@ -1,0 +1,9 @@
+1.安装
+sudo apt-get install xrdp
+sudo apt-get install vnc4server
+sudo apt-get install xubuntu-desktop
+输入"echo "xfce4-session" >~/.xsession"
+sudo service xrdp restart
+
+2.windows输入：mstsc
+

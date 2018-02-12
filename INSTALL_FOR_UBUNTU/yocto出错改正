@@ -1,0 +1,77 @@
+1.
+WARING: assimp-3.3.1-r0 do_fetch: Failed to fetch URL https://github.com/assimp/assimp/archive/v3.3.1.tar.gz, attempting MIRRORS if available
+ERROR: assimp-3.3.1-r0 do_fetch: Fetcher failure: Fetch command export DBUS_SESSION_BUS_ADDRESS="unix:abstract=/tmp/dbus-rcHx6Qh2Ef,guid=ed444798e53137259dfff2d05a7906b1"; export SSH_AGENT_PID="1637"; export SSH_AUTH_SOCK="/tmp/ssh-hiI5zKOrxdyR/agent.1605"; export PATH="/home/wtmecnxp/workstation/yotcoiMX/sources/poky/scripts:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/usr/bin/arm-poky-linux-gnueabi:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/imx6qsabresd/usr/bin/crossscripts:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/usr/sbin:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/usr/bin:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/sbin:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/bin:/home/wtmecnxp/workstation/yotcoiMX/sources/poky/scripts:/home/wtmecnxp/workstation/yotcoiMX/sources/poky/bitbake/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/local/bin:/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin"; export HOME="/home/wtmecnxp"; /usr/bin/env wget -t 2 -T 30 -nv --passive-ftp --no-check-certificate -P /home/wtmecnxp/workstation/yotcoiMX/downloads/ 'https://github.com/assimp/assimp/archive/v3.3.1.tar.gz' --progress=dot -v failed with exit code 4, output:
+--2018-02-07 14:44:18--  https://github.com/assimp/assimp/archive/v3.3.1.tar.gz
+Resolving github.com (github.com)... 192.30.255.112
+Connecting to github.com (github.com)|192.30.255.112|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://codeload.github.com/assimp/assimp/tar.gz/v3.3.1 [following]
+--2018-02-07 14:44:19--  https://codeload.github.com/assimp/assimp/tar.gz/v3.3.1
+Resolving codeload.github.com (codeload.github.com)... 192.30.255.121, 192.30.255.120
+Connecting to codeload.github.com (codeload.github.com)|192.30.255.121|:443... connected.
+Unable to establish SSL connection.
+
+ERROR: assimp-3.3.1-r0 do_fetch: Fetcher failure for URL: 'https://github.com/assimp/assimp/archive/v3.3.1.tar.gz'. Unable to fetch URL from any source.
+ERROR: assimp-3.3.1-r0 do_fetch: Function failed: base_do_fetch
+ERROR: Logfile of failure stored in: /home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/work/cortexa9hf-neon-mx6qdl-poky-linux-gnueabi/assimp/3.3.1-r0/temp/log.do_fetch.30763
+ERROR: Task (/home/wtmecnxp/workstation/yotcoiMX/sources/meta-fsl-bsp-release/imx/meta-sdk/recipes-graphics/assimp/assimp_3.3.1.bb:do_fetch) failed with exit code '1'
+
+分析：
+这个error，是在fetch：assimp-3.3.1-r0的时候，出错了。
+在错误信息里的地址：https://codeload.github.com/assimp/assimp/tar.gz/v3.3.1，复制到浏览器里，是可以下载的。
+用 wget https://codeload.github.com/assimp/assimp/tar.gz/v3.3.1也可以下载。只是时间稍长。
+猜测是time out错误。
+
+所有，在/home/wtmecnxp/workstation/yotcoiMX/sources目录下，
+搜索“/usr/bin/env wget -t 2 -T 30”，这里两个参数需要介绍一下：
+
+-t,  --tries=NUMBER           设定最大尝试链接次数(0 表示无限制).
+-T,  --timeout=SECONDS        设定响应超时的秒数
+
+在搜索的结果中将参数值2改为0，30改为300.
+当assimp-3.3.1-r0下载完成后，再改回来,当然也可以不改。
+
+下面这三个文件：
+poky/scripts/test-remote-image +246:        wget_cmd = '/usr/bin/env wget -t 2 -T 30 -nv --passive-ftp --no-check-certificate '
+poky/bitbake/lib/bb/fetch2/wget.py +91:        self.basecmd = d.getVar("FETCHCMD_wget", True) or "/usr/bin/env wget -t 2 -T 300 --passive-ftp --no-check-certificate"
+poky/meta/conf/bitbake.conf +627:FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 30 -nv --passive-ftp --no-check-certificate"
+
+2.
+ERROR: imx-gpu-sdk-4.0.1-r0 do_fetch: Fetcher failure: Fetch command export DBUS_SESSION_BUS_ADDRESS="unix:abstract=/tmp/dbus-rcHx6Qh2Ef,guid=ed444798e53137259dfff2d05a7906b1"; export SSH_AGENT_PID="1637"; export SSH_AUTH_SOCK="/tmp/ssh-hiI5zKOrxdyR/agent.1605"; export PATH="/home/wtmecnxp/workstation/yotcoiMX/sources/poky/scripts:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/usr/bin/arm-poky-linux-gnueabi:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/imx6qsabresd/usr/bin/crossscripts:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/usr/sbin:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/usr/bin:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/sbin:/home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/sysroots/x86_64-linux/bin:/home/wtmecnxp/workstation/yotcoiMX/sources/poky/scripts:/home/wtmecnxp/workstation/yotcoiMX/sources/poky/bitbake/bin:/bin:/usr/bin:/usr/X11R6/bin:/usr/local/bin:/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin:/usr/lib/jvm/java-1.8.0-openjdk-amd64/jre/bin"; export HOME="/home/wtmecnxp"; LANG=C git -c core.fsyncobjectfiles=0 clone --bare --mirror http://github.com/NXPmicro/gtec-demo-framework.git /home/wtmecnxp/workstation/yotcoiMX/downloads//git2/github.com.NXPmicro.gtec-demo-framework.git --progress failed with exit code 128, output:
+Cloning into bare repository '/home/wtmecnxp/workstation/yotcoiMX/downloads//git2/github.com.NXPmicro.gtec-demo-framework.git'...
+remote: Counting objects: 11215, done.
+error: RPC failed; result=56, HTTP code = 200
+fatal: The remote end hung up unexpectedly
+fatal: early EOF
+fatal: index-pack failed
+
+ERROR: imx-gpu-sdk-4.0.1-r0 do_fetch: Fetcher failure for URL: 'git://github.com/NXPmicro/gtec-demo-framework.git;protocol=http'. Unable to fetch URL from any source.
+ERROR: imx-gpu-sdk-4.0.1-r0 do_fetch: Function failed: base_do_fetch
+ERROR: Logfile of failure stored in: /home/wtmecnxp/workstation/yotcoiMX/build-x11/tmp/work/cortexa9hf-neon-mx6qdl-poky-linux-gnueabi/imx-gpu-sdk/4.0.1-r0/temp/log.do_fetch.13823
+ERROR: Task (/home/wtmecnxp/workstation/yotcoiMX/sources/meta-fsl-bsp-release/imx/meta-sdk/recipes-graphics/imx-gpu-sdk/imx-gpu-sdk_4.0.1.bb:do_fetch) failed with exit code '1'
+
+出现git clone中断的情况。远程便捷HTTP传输请求数据时最大的缓存字节数，默认时1M字节，默认能满足大多数请求。
+现在改成2M:
+git config --global http.postBuffer 2M
+
+改完以后还是不行。
+直接看看脚本里有什么。
+在上面的error中，可以找到/home/wtmecnxp/workstation/yotcoiMX/sources/meta-fsl-bsp-release/imx/meta-sdk/recipes-graphics/imx-gpu-sdk/imx-gpu-sdk_4.0.1.bb文件位置。
+进去找到：SRC_URI = "git://github.com/NXPmicro/gtec-demo-framework.git;protocol=http"，可以看到是用的http协议。
+首先复制github.com/NXPmicro/gtec-demo-framework.git
+粘贴到浏览器
+得到这个地址：https://github.com/codeauroraforum/gtec-demo-framework
+在打开的网页内，有一个绿色的按钮，上面写着：clone or download，点击，有一个copy to clipboard，点击。
+得到https://github.com/codeauroraforum/gtec-demo-framework.git
+把这个地址替换原来脚本里的。
++#SRC_URI = "git://github.com/NXPmicro/gtec-demo-framework.git;protocol=http"
++SRC_URI = "https://github.com/codeauroraforum/gtec-demo-framework.git"
+
+再次编译，会报错：没有CHKSUM。他会要求你将
+SRC_URI[md5sum] = "2ca41d01db4c11d62055a95192aa133b"
+SRC_URI[sha256sum] = "39edaed7f9d1892ca2658be16b82adeba70f866771d54ef61a9679c5087d04c0"
+复制到脚本里。当然不是上面的值，每次错误值都不一样。
+
+
+
+

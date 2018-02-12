@@ -1,0 +1,37 @@
+（1）.
+cd /disk2/workstation/S32V234
+
+sudo tar zxvf yocto_auto_linux_bsp15.0.tgz 
+  
+cd yocto_auto_linux_bsp15.0/
+sudo ./deploy.sh 
+  
+sudo ./poky/scripts/host-prepare.sh 
+有一个关于权限的error。
+
+  执行 sudo /usr/sbin/visudo 
+	修改：
+root    ALL=(ALL:ALL) ALL
++root ALL = NOPASSWD: /usr/bin/apt-get
+
+保存。退出，接着执行，
+
+sudo ./poky/scripts/host-prepare.sh 
+这里安装了java open jdk 7.可是我已经装8了啊。
+
+    update-java-alternatives -l
+这条指令可以看到我安装了两个jdk。
+java-1.7.0-openjdk-amd64 1071 /usr/lib/jvm/java-1.7.0-openjdk-amd64
+java-1.8.0-openjdk-amd64 1069 /usr/lib/jvm/java-1.8.0-openjdk-amd64
+
+那我现在用哪个呢？
+----------------------S32V234用jdk-7，-----------i.MX用jdk-8
+
+如何切换呢？执行：
+   sudo update-alternatives --config java && sudo update-alternatives --config javac && sudo update-alternatives --config javap
+
+查看切换后的状态：
+	java -version;javac -version;javap -version;
+
+（2）.
+

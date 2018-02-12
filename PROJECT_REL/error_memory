@@ -1,0 +1,18 @@
+[ 33% 12439/37360] host Java: signapk (out/host/common/obj/JAVA_LIBRARIES/signapk_intermediates/classes)
+[ 33% 12440/37360] Copying: out/host/common/obj/JAVA_LIBRARIES/signapk_intermediates/classes-jarjar.jar
+[ 33% 12441/37360] Copying: out/host/common/obj/JAVA_LIBRARIES/signapk_intermediates/javalib.jar
+[ 33% 12442/37360] host C: libssl_static-host <= external/boringssl/src/ssl/d1_pkt.c
+[ 33% 12443/37360] host C: libssl_static-host <= external/boringssl/src/ssl/d1_srtp.c
+[ 33% 12444/37360] host C: libssl_static-host <= external/boringssl/src/ssl/d1_srvr.c
+[ 33% 12445/37360] host C: libssl_static-host <= external/boringssl/src/ssl/dtls_record.c
+[ 33% 12446/37360] host C: libssl_static-host <= external/boringssl/src/ssl/pqueue/pqueue.c
+[ 33% 12447/37360] host C: libssl_static-host <= external/boringssl/src/ssl/s3_both.c
+[ 33% 12448/37360] Building with Jack: out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/with-local/classes.dex
+FAILED: /bin/bash out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/with-local/classes.dex.rsp
+Out of memory error (version 1.2-rc4 'Carnac' (298900 f95d7bdecfceb327f9d201a1348397ed8a843843 by android-jack-team@google.com)).
+GC overhead limit exceeded.
+Try increasing heap size with java option '-Xmx<size>'.
+Warning: This may have produced partial or corrupted output.
+ninja: build stopped: subcommand failed.
+make: *** [ninja_wrapper] Error 1
+

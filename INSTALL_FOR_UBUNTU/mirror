@@ -1,0 +1,82 @@
+选用清华大学开源软件镜像站：https://mirror.tuna.tsinghua.edu.cn/ubuntu/
+
+    http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ (v4/v6) 
+    http://mirrors.4.tuna.tsinghua.edu.cn/ubuntu/ (v4) 
+    http://mirrors.6.tuna.tsinghua.edu.cn/ubuntu/ (v6)
+
+1、备份系统默认源
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+2、打开软件源文件
+sudo vim /etc/apt/sources.list
+3、将以下内容替换到源文件（注意在清华大学网站上选择合适自己系统的版本）
+
+# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial main main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-security main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-security main restricted universe multiverse
+
+# 预发布软件源，不建议启用
+# deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-proposed main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ xenial-proposed main restricted universe multiverse
+
+4、更新软件源
+sudo apt-get update
+5、更新系统所有软件
+sudo apt-get dist-upgrade
+
+选择是，系统就会自动更新所有已安装的软件到最新版。
+
+--------------------------------------------
+sudo apt-get update #这一步是更新你的源列表，换源后必须执行
+sudo apt-get dist-upgrade #这一步是更新软件，如果你对新版本软件的需求不是那么迫切，可以不执行
+--------------------------------------------
+
+我们知道，迄今为止，Ubuntu已有多个发行版，如11.04、11.10，以至于现在最新的16.10。
+而我们平常通过apt-get来安装软件，如果OS版本不同，那么镜像源的配置就不同，否则就会出现找不到对应软件、软件版本不匹配等一系列奇怪的问题。
+这里，我就讲述一下如何配置不同的版本的镜像源。在此，我就以网易的镜像源为例。
+
+搜索“网易apt-get源”，基本就能搜到以下的内容。
+deb http://mirrors.163.com/ubuntu/ Codename main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu/ Codename-security main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu/ Codename-updates main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu/ Codename-proposed main restricted universe multiverse
+deb http://mirrors.163.com/ubuntu/ Codename-backports main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ Codename main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ Codename-security main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ Codename-updates main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ Codename-proposed main restricted universe multiverse
+deb-src http://mirrors.163.com/ubuntu/ Codename-backports main restricted universe multiverse
+作为刚开始使用Ubuntu的笔者，愚蠢的认为这个配置符合所有的版本，结果，就出现了上面说的安装软件和依赖包之间版本不匹配的问题。
+
+　　以上的配置中，表明版本的就是关键字“Codename”，这是Ubuntu表示版本的一种形式(Ubuntu称其为Codename)，它即对应了一个发行版。版本号和Codename的对应关系如下表。这里只需要将上面的Codename字符串替换为下文中具体的Codename即可。
+
+版本号    Codename
+11.04:  natty
+11.10:  oneiric
+12.04:  precise
+12.10:  quantal
+13.04:  raring
+13.10:  saucy
+14.04:  trusty
+14.10:  utopic
+15.04:  vivid
+15.10:  wily
+16.04:  xenial
+16.10:  yakkety
+...
+
+如果不知道Codename也没关系，只要在Ubuntu命令行中输入命令“lsb_release -a”，即可显示其Codename。如下，trusty即为14.04的Codename。
+
+# lsb_release -a
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 14.04 LTS
+Release:    14.04
+Codename:  trusty
+
+将修改完的配置替换到/etc/apt/sources.list中，然后输入apt-get update，待其更新好索引后，就可以通过apt-get install来尽情的安装软件了。

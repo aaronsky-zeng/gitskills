@@ -1,0 +1,122 @@
+
+Ubuntu 14.04 
+（1）安装必要的安装包：
+sudo apt-get install gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential chrpath socat libsdl1.2-dev
+sudo apt-get install lib32stdc++6 lib32z1
+sudo apt-get install libsdl1.2-dev xterm sed cvs subversion coreutils texi2html docbook-utils python-pysqlite2 help2man 
+sudo apt-get install make gcc g++ desktop-file-utils libgl1-mesa-dev libglu1-mesa-dev 
+sudo apt-get install mercurial autoconf automake groff curl lzop asciidoc
+
+sudo apt-get install u-boot-tools python python3 python3-pip python3-pexpect python-git xz-utils debianutils iputils-ping
+sudo apt-get install lib32stdc++6
+sudo apt-get install lib32z1
+（2）安装git
+sudo apt-get install git
+
+（3）Setting up the repo utility
+***********************************
+1. Create a bin folder in the home directory.
+$ mkdir ~/bin (this step may not be needed if the bin folder already exists)
+$ curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+
+这条指令通常是会被屏蔽的。
+所以用下面这条指令，从GitHub中下载repo
+$ curl https://raw.githubusercontent.com/android/tools_repo/stable/repo >  ~/bin/repo
+这条指令执行之后，可能会出现error，不用担心，是一些安装包没有安装，按提示安装就行。
+
+$ chmod a+x ~/bin/repo
+
+2. Add the following line to the .bashrc file to ensure that the ~/bin folder is in your PATH variable.
+$ export PATH=~/bin:$PATH
+
+（4）Yocto Project Setup
+*************************
+First make sure that git is set up properly with the commands below.
+$ git config --global user.name "aaron.zeng"
+$ git config --global user.email "aaron.zeng@wtmec.com"
+$ git config --list
+user.name=aaron.zeng
+user.email=aaron.zeng@wtmec.com
+当你从user切换至root,上面的指令需要重新执行.
+
+（5）set up repo
+********************
+$ mkdir fsl-arm-yocto-bsp
+$ cd fsl-arm-yocto-bsp
+$ repo init -u git://git.freescale.com/imx/fsl-arm-yocto-bsp.git -b imx-morty
+
+会出现如下错误：
+fatal: Cannot get https://gerrit.googlesource.com/git-repo/clone.bundle
+fatal: error [Errno 101] Network is unreachable
+从脚本里看，走的是Google源，因为远端的git server的域名gerrit.googlesource.com会被GFW挡掉
+用下面这条,绕过Google，从GitHub下载：
+
+$ repo init -u git://git.freescale.com/imx/fsl-arm-yocto-bsp.git -b imx-morty --repo-url=http://github.com/android/tools_repo
+
+README中example用这个：
+$ repo init -u git://git.freescale.com/imx/fsl-arm-yocto-bsp.git -b imx-morty -m imx-4.9.11-1.0.0_ga.xml --repo-url=http://github.com/android/tools_repo
+$ repo sync
+
+说明：
+    For errors with repo init, remove the .repo directory and run repo init again.
+    To pick up previous releases from morty base add -m (release manifest name) at the end of repo init line and it will retrieve previous releases。
+
+(6)build	
+***************
+The syntax for the fsl-setup-release.sh script is shown below.
+$ DISTRO=<distro name> MACHINE=<machine name> source fsl-setup-release.sh -b <build dir>
+-------------------------------------------------------------------------------------------------------------------------------|
+|  DISTRO=<distro configuration name> is the distro, which configures the build environment and it is stored in                |
+|  meta-fslbsp-release/imx/meta-sdk/conf/distro.                                                                               |
+|																															   |
+|  MACHINE=<machine configuration name> is the machine name which points to the configuration file in conf/machine in          |
+|  meta-fsl-arm and meta-fsl-bsp-release.                                                                                      |
+|  -b <build dir> specifies the name of the build directory created by the fsl-setup-release.sh script.                        |
+-------------------------------------------------------------------------------------------------------------------------------|
+
+针对这块板子，执行以下命令，全部编译：
+$ DISTRO=fsl-imx-x11 MACHINE=imx6qsabresd source fsl-setup-release.sh -b build-x11
+$ bitbake fsl-image-validation-imx
+
+
+-----------------------------------下面是文档里给的路径，但是没有找到------------------------------------------------------
+编译完成后，如果需要单独 编译uboot或者kernel，需要导出交叉编译工具链：
+$ export CROSS_COMPILE=/opt/fsl-imx-fb/4.9.11/environment-setup-cortexa9hf-vfp-neonpoky-linux-gnueabi
+$ export ARCH=arm
+
+---------------------------------------------------------------------------------------------------------------------------
+交叉编译工具链for i.MX 8 SoC.
+$ export CROSS_COMPILE=source/opt/fsl-imx-fb/4.9.11/environment-setup-aarch64-poky-linux
+$ export ARCH=arm
+build U-Boot for i.MX 8 SoC.
+$ export CROSS_COMPILE=source/opt/fsl-imx-fb/4.9.11/environment-setup-aarch64-pokylinux
+$ export ARCH=arm64（不知道是不是笔误，还是本来就是arm64）
+----------------------------------------------------------------------------------------------------------------------
+
+单独下载uboot和kernel
+uboot：
+git clone http://git.freescale.com/git/cgit.cgi/imx/uboot-imx.git -b imx_v2017.03_4.9.11_1.0.0_ga
+kernel：
+git clone http://git.freescale.com/git/cgit.cgi/imx/linux-imx.git -b imx_4.9.11_1.0.0_ga
+
+
+
+
+
+
+
+------------------------------------------这部分以下不考虑------------------------------------------------------------------------
+U-Boot SATA 
+$ echo "UBOOT_CONFIG = \"sata\"" >> conf/local.conf
+$ MACHINE=imx6qsabresd bitbake -c deploy u-boot-imx
+
+---------------------------------------------Chromium-------------------------------------------------------------------------
+The Chromium browser requires additional layers added in the fsl-release-setup.sh script.
+To enable chromium requires the following steps:
+
+In local.conf
+- Add chromium into your install list:
+CORE_IMAGE_EXTRA_INSTALL += "chromium libexif"
+
+- Add commercial into the white list:
+LICENSE_FLAGS_WHITELIST="commercial"

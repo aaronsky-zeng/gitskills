@@ -1,0 +1,31 @@
+1.安装
+sudo apt-get install samba samba-common
+
+2.新建共享目录：
+sudo mkdir /home/wtmecnxp/samba_share
+sudo chmod 777 /home/wtmecnxp/samba_share
+
+3.配置
+sudo gedit /etc/samba/smb.conf
+
+在最后输入：
+[myshare]
+   comment = my share Dir
+   path = /home/wtmecnxp/samba_share
+   browseable = yes
+   public = yes
+   writable = yes
+   available = yes
+
+4.重启
+sudo /etc/init.d/samba restart
+
+5.添加系统账号
+sudo groupadd share -g 6000
+sudo useradd share -u 6000 -s /shin/nologin -d /dev/null
+
+6.使用：
+打开我的电脑，右键“添加一个网络位置”
+
+windows上出现权限问题：sudo chmod -R 777 Linux_Android_DOC （修改子文件夹属性）
+输入：\\10.5.66.99\samba_share

@@ -1,0 +1,396 @@
+Android
+（一）安装必要的安装包
+$ sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip uuid uuid-dev zlib1g-dev liblz-dev liblzo2-2 liblzo2-dev lzop git-core curl u-boot-tools mtd-utils android-tools-fsutils
+$ sudo apt-get install uuid uuid-dev
+$ sudo apt-get install zlib1g-dev liblz-dev
+$ sudo apt-get install liblzo2-2 liblzo2-dev
+$ sudo apt-get install lzop
+$ sudo apt-get install git-core curl
+$ sudo apt-get install u-boot-tools
+$ sudo apt-get install mtd-utils
+$ sudo apt-get install android-tools-fsutils
+$ sudo apt-get install openjdk-8-jdk
+$ sudo apt-get install device-tree-compiler
+------------------------------------------------------------------------------------------------------------
+	在unbuntu14.04系统上安装 Open JDK 8 时遇到了如下问题：
+
+	$ sudo apt-get install openjdk-8-jdk
+	Reading package lists... Done
+	Building dependency tree       
+	Reading state information... Done
+	E: Unable to locate package openjdk-8-jdk
+
+	解决方法：
+
+	As you can see I only have java 1.7 installed (on a Ubuntu 14.04 machine).
+
+	$ update-java-alternatives -l
+	java-1.7.0-openjdk-amd64 1071 /usr/lib/jvm/java-1.7.0-openjdk-amd64
+
+	To install Java 8, I did,
+
+	$ sudo add-apt-repository ppa:openjdk-r/ppa
+	$ sudo apt-get update
+	$ sudo apt-get install openjdk-8-jdk
+
+	Afterwards, now I have java 7 and 8,
+
+	$ update-java-alternatives -l
+	java-1.7.0-openjdk-amd64 1071 /usr/lib/jvm/java-1.7.0-openjdk-amd64
+	java-1.8.0-openjdk-amd64 1069 /usr/lib/jvm/java-1.8.0-openjdk-amd64
+
+	How to switch between different versions?  run the follwing command from the terminal:
+
+	$ sudo update-alternatives --config java
+	There are 2 choices for the alternative java (providing /usr/bin/java).
+
+	Selection    Path                                            Priority   Status
+	------------------------------------------------------------
+	0            /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java   1071      auto mode
+	1            /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java   1071      manual mode
+	* 2            /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java   1069      manual mode
+
+	Press enter to keep the current choice[*], or type selection number:
+
+	As you can see I'm running open jdk 8. To switch to to jdk 7, press 1 and hit the Enter key. Do the same for javac,javap,javadoc as well with,:
+
+	$ sudo update-alternatives --config javac
+	$ sudo update-alternatives --config javap
+	$ sudo update-alternatives --config javadoc
+
+	配置：
+	vim ~/.bashrc
+		
+	JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+	JRE_HOME=$JAVA_HOME/jre
+	JAVA_BIN=$JAVA_HOME/bin
+	CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib
+	PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin
+	export JAVA_HOME JRE_HOME PATH CLASSPATH
+------------------------------------------------------------------------------------------------------------
+		用root权限来执行一些命令，比如c_patch等：
+			sudo passwd root
+			123456
+		
+		如果repo，git不过，试试关闭ubuntu的防火墙:
+			ufw disable
+-----------------------------------------------
+（2）安装git
+sudo apt-get install git
+Configure git before use. Set the name and email as follows:
+? git config --global user.name "First Last"
+? git config --global user.email "first.last@company.com"
+如果进su -了，需要重新git config
+
+（3）解压Android源码：
+tar xzvf android_N7.1.2_2.0.0_source.tar.gz
+注意：不要再虚拟机的共享文件夹下解压
+--------------------------------------------------------------------
+（4）Get android code/kernel/uboot
+
+$ cd ~
+$ mkdir myandroid
+$ mkdir bin
+$ cd myandroid
+$ curl https://raw.githubusercontent.com/android/tools_repo/stable/repo >  ~/bin/repo
+
+$ chmod a+x ~/bin/repo
+$ ~/bin/repo init -u https://android.googlesource.com/platform/manifest -b android-7.1.2_r9
+
+这条会被屏蔽，所以将 https://android.googlesource.com/ 全部使用 https://aosp.tuna.tsinghua.edu.cn/ 代替。
+即： repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-7.1.2_r9
+  
+$ ~/bin/repo sync 
+# This command loads most needed repos. Therefore, it can take several hours to load.
+# clone bpt.git from google repo, and checkout to the b7c3059e5d8c408f60222edc898ef1c229d8fc2d commit.
+=================================================以下的bpt，kernel，uboot需要注意了============================
+$ cd ~/myandroid/system/tools
+$ git clone https://android.googlesource.com/platform/system/tools/bpt
+-------->git clone https://aosp.tuna.tsinghua.edu.cn/platform/system/tools/bpt
+$ cd bpt
+$ git checkout b7c3059e5d8c408f60222edc898ef1c229d8fc2d  (此时是没有属于的branch的，游离的状态)
+$ git checkout -b aaronbpt				(aaronbpt分支，第一个log的commit是n7.1.2_2.0.0-ga)
+$ git tag n7.1.2_2.0.0-ga
+
+--------------------------------------------------------------
+Get the N7.1.2_2.0.0 kernel source code from Freescale open source git:
+$ cd ~/myandroid
+$ git clone git://git.freescale.com/imx/linux-imx.git kernel_imx
+(sudo git clone git://git.freescale.com/imx/linux-imx.git kernel_imx)
+# the kernel repo is large. Therefore, this process can take a while.
+$ cd kernel_imx
+$ git checkout n7.1.2_2.0.0-ga	(此时是没有属于的branch的，游离的状态)
+--------------------------------------------------------
+If you use U-Boot as your bootloader, clone the U-Boot git repository from the open source git:
+
+$ cd ~/myandroid/bootable
+$ mkdir bootloader
+$ cd bootloader
+$ git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx
+(sudo git clone git://git.freesle.com/imx/uboot-imx.git uboot-imx)
+$ cd uboot-imx
+$ git checkout n7.1.2_2.0.0-ga (此时是没有属于的branch的，游离的状态)
+
+==============================================================================================================
+（5）Patch standard features code package
+	运行and_patch.sh脚本，更新patch。
+	1. Assume you have unzipped the i.MX Android release package to /opt/android_N7.1.2_2.0.0_source.
+		$ cd ~/myandroid
+		$ source /opt/android_N7.1.2_2.0.0_source/code/N7.1.2_2.0.0/and_patch.sh
+			#The patch script (and_patch.sh) requires some basic utilities like awk/sed. 
+			#If they are not available on the computer running Linux OS, install them first.
+		$ help
+	2. You should see that the "c_patch" function is available.
+		$ c_patch /opt/android_N7.1.2_2.0.0_source/code/N7.1.2_2.0.0/ imx_N7.1.2_2.0.0-ga
+			#Here, "/opt/android_N7.1.2_2.0.0_source/code/N7.1.2_2.0.0" is the location of the patches, 
+			#which is the directory created when you unzip the release package.
+			
+			#"imx_N7.1.2_2.0.0" is the branch which is created automatically to hold all patches 
+			#(only in those existing Google gits).
+			
+			#Choose any branch name instead of "imx_N7.1.2_2.0.0".
+			
+	3. If everything is OK, "c_patch" generates the following output to indicate the successful patch:
+			*****************************************************************
+			Success: Now you can build the Android code for FSL i.MX platform
+			*****************************************************************
+-----------------------------------------------------------------------------------------------------------
+（6）Building Android images
+	1. Change to the top level build directory.
+	$ cd ~/myandroid
+	
+	2. Set up the environment for building. This only configures the current terminal.
+	$ source build/envsetup.sh
+	
+	3. Execute the Android lunch command. In this example, the setup is for the production image of i.MX 6DualQuad
+	SABRE Board/Platform device with user type.
+	$ lunch sabresd_6dq-user   -----调试阶段用----> lunch sabresd_6dq-eng
+	
+	4. Execute the make command to generate the image.
+	$ make 2>&1 | tee build-log.txt
+	
+	生成的img在myandroid/out/target/product/sabresd_6dq这个路径下。
+----------------------------------------------------------------------------------------------------------------	
+
+（7）Building Android image for the SD card on the SABRE-SD Board
+
+	The default configuration in the source code package takes internal eMMC as the boot storage. 
+	It can be changed to make the SD card in SD Slot 3 as the boot storage as follows:
+	1. Remove /out/target/product/sabresd_6dq/root directory and boot*.img.
+	2. Remove /out/target/product/sabresd_6dq/recovery directory and recovery*.img.
+	3. Build the boot.img and recovery.img as follows:
+		make bootimage BUILD_TARGET_DEVICE=sd
+		make recoveryimage BUILD_TARGET_DEVICE=sd
+		
+---------------------------------------------------------------------------------------------------------------
+
+（8）单独编译UBOOT
+$ cd ~/myandroid/bootable/bootloader/uboot-imx
+$ export ARCH=arm
+$ export CROSS_COMPILE=~/myandroid/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-
+$ make distclean
+
+# To build uboot.imx that is used in Android platform
+$ make mx6qsabresdandroid_config
+# To build uboot.img that is used in MFGTOOL
+$ make mx6qsabresd_config
+$ make
+
+(9)Building a kernel image
+(10)Building boot.img
+# Boot image for the i.MX 6Dual/6Quad SABRE-SD board
+$ cd ~/myandroid
+$ source build/envsetup.sh
+$ lunch sabresd_6dq-user
+$ make bootimage
+*****************************************************北大的repo只能下载北大的镜像**************************************************************
+[I.MX6Q][Android6.0.1_r3]之源码获取及编译
+
+$ sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip uuid uuid-dev zlib1g-dev liblz-dev liblzo2-2 liblzo2-dev lzop git-core curl u-boot-tools mtd-utils android-tools-fsutils
+
+安装JDK
+Android6.0.1_r3已经开始使用OpenJDK，而且默认使用OpenJDK7。安装方法如下：
+$ sudo apt-get install openjdk-7-jdk
+
+配置默认java版本,如果电脑上只安装一个版本，这个可以不做。
+$ sudo update-alternatives --config java
+$ sudo update-alternatives --config javac
+
+测试一下Java版本
+
+$ java -version
+$ javac -version
+
+使用北大的镜像，获取Android6.0.1_r3源码
+$ cd ~
+$ mkdir myandroid
+$ mkdir bin
+$ cd myandroid
+$ curl https://storage-googleapis.lug.ustc.edu.cn/git-repo-downloads/repo > ~/bin/repo
+$ chmod a+x ~/bin/repo
+$ ~/bin/repo init -u git://mirrors.ustc.edu.cn/aosp/platform/manifest -b android-6.0.1_r3
+$ ~/bin/repo sync
+
+数个小时过后……
+
+    获取I.MX Kernel
+
+$ cd ~/myandroid
+$ git clone git://git.freescale.com/imx/linux-2.6-imx.git kernel_imx
+
+几十分钟过后……
+
+$ cd kernel_imx
+$ git checkout m6.0.1_1.0.0-ga
+
+
+    获取I.MX U-boot
+
+$ cd ~/myandroid/bootable
+$ cd bootloader
+$ git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx
+
+几分钟过后……
+
+$ cd uboot-imx
+$ git checkout m6.0.1_1.0.0-ga
+
+    为源码打I.MX的补丁
+
+下载源码补丁android_M6.0.1_1.0.0_core_source.tar.gz,点这里。
+
+$ cd ~
+$ tar zxvf android_M6.0.1_1.0.0_core_source.tar.gz
+$ cd myandroid
+$ source ../android_M6.0.1_1.0.0_core_source/code/M6.0.1_1.0.0/and_patch.sh
+$ c_patch /opt/android_M6.0.1_1.0.0_core_source/code/M6.0.1_1.0.0/ imx_M6.0.1_1.0.0
+
+几分钟之后……
+
+如果以下提示，说明你已经成功打补丁
+*****************************************************************
+Success: Now you can build the Android code for FSL i.MX platform
+*****************************************************************
+
+    编译Android
+
+$ echo export USE_CCACHE=1 >> ~/.bashrc //设置编译器使用高速缓存
+$ prebuilts/misc/linux-x86/ccache/ccache -M 50G //设置缓存最大占用空间为50GB
+$ cd ~/myandroid
+$ source build/envsetup.sh
+$ lunch sabresd_6dq-user
+$ make 2>&1 | tee build-log.txt
+or
+$ make
+
+数个小时之后，你将在 < AndroidSDK >out/target/product/sabresd_6dq/看到u-boot.imx boot.img recovery.img system.img 等文件。
+
+    Android目录文件解析
+
+root目录：安卓root文件系统，里面存放init init.rc等文件，会被挂载到 / 。
+system目录：安卓system目录，存放二进制文件和库，会被挂载到 /system 。
+data目录：安卓data目录，存放用户的一些私有文件， 会被挂载到 /data 。
+recovery目录：当启动到recovery模式时，做root文件系统，一般不会直接使用。
+boot.img：集成内核的zImage、ramdisk.img、dtb(设备树文件)还有启动参数。
+ramdisk.img:由root目录生成，然后被集成到boot.img，不会被直接使用。
+recovery.img:EXT4格式的img文件，由recovery目录生成。
+u-boot.imx:u-boot镜像，不用多说。
+
+    单独编译u-boot镜像
+
+$ cd ~/myandroid/bootable/bootloader/uboot-imx
+$ export ARCH=arm
+$ export CROSS_COMPILE=~/myandroid/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/
+arm-linux-androideabi-
+$ make distclean
+$ make mx6qsabresdandroid_config
+$ make
+
+    单独编译uImage镜像
+
+$ export PATH=~/myandroid/bootable/bootloader/uboot-imx/tools:$PATH
+$ cd ~/myandroid/kernel_imx
+$ export ARCH=arm
+$ export CROSS_COMPILE=~/myandroid/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/bin/
+arm-linux-androideabi-
+$ make imx_v7_android_defconfig
+$ make KCFLAGS=-mno-android
+$ make uImage LOADADDR=0x10008000 KCFLAGS=-mno-android
+
+几十分钟过后……
+查看目录< Kernel_imx>/arch/arm/boot/ ，你可以看到zImage 和 uImage 文件
+
+    单独编译boot.img镜像
+
+cd ~/myandroid
+source build/envsetup.sh
+lunch sabresd_6dq-user
+make bootimage
+
+    单独编译recovery.img镜像
+
+cd ~/myandroid
+source build/envsetup.sh
+lunch sabresd_6dq-user
+make recoveryimage
+
+I.MX6Q Android6.0.1_r3启动部分注意点
+
+    Boot.img默认启动参数解析
+
+在文件< AndroidSDK>/device/fsl/sabresd_6dq/BoardConfig.mk中 BOARD_KERNEL_CMDLINE 记录了boot.img的默认参数，我们可以修改它，或者在Uboot中设置自己的启动参数，如下操作
+
+U-Boot > setenv bootargs
+U-Boot > setenv bootargs console=ttymxc0,115200 init=/init video=mxcfb0:dev=ldb,bpp=32
+video=mxcfb1:off video=mxcfb2:off video=mxcfb3:off vmalloc=256M androidboot.console=ttymxc0
+consoleblank=0 androidboot.hardware=freescale cma=384M
+
+    fstab文件注意
+
+在文件< AndroidSDK>/device/fsl/sabresd_6dq/BoardConfig.mk中 TARGET_RECOVERY_FSTAB 记录了fstab文件的路径，如果在启动时发现挂载文件系统时路径不 对，大家可以修改上宏所指定的文件即可。
+F&Q
+
+1.系统启动时报错，导致system挂载不上：fs_mgr: Error loading verity table (No such file or directory)fs_mgr: Could not set up verified partition, skipping!
+解决办法：
+在bootargs中加入如下参数：
+
+androidboot.selinux=disabled androidboot.dm_verity=disabled
+
+
++++++++++++++++++++++++++++++++++++++清华镜像压缩包++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+1.初始化包：
+wget https://mirrors.tuna.tsinghua.edu.cn/aosp-monthly/aosp-latest.tar
+
+2.指定要同步的分支：
+repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-5.0.2_r1
+repo sync
+
+**************************************************************************************************
+出现这个错误：Recv failure: Connection reset by peer
+先关防火墙试试 sudo ufw disable
+
+关于防火墙的：
+1 启用
+ sudo ufw enable
+ sudo ufw default deny 
+作用：开启了防火墙并随系统启动同时关闭所有外部对本机的访问（本机访问外部正常）。
+
+2 关闭
+ sudo ufw disable 
+2 查看防火墙状态
+ sudo ufw status 
+3 开启/禁用相应端口或服务举例
+ sudo ufw allow 80 允许外部访问80端口
+ sudo ufw delete allow 80 禁止外部访问80 端口
+ sudo ufw allow from 192.168.1.1 允许此IP访问所有的本机端口
+ sudo ufw deny smtp 禁止外部访问smtp服务
+ sudo ufw delete allow smtp 删除上面建立的某条规则
+ sudo ufw deny proto tcp from 10.0.0.0/8 to 192.168.0.1 port 22 要拒绝所有的TCP流量从10.0.0.0/8 到192.168.0.1地址的22端口
+
+ 可以允许所有RFC1918网络（局域网/无线局域网的）访问这个主机（/8,/16,/12是一种网络分级）：
+ sudo ufw allow from 10.0.0.0/8
+ sudo ufw allow from 172.16.0.0/12
+ sudo ufw allow from 192.168.0.0/16
+×××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
+	

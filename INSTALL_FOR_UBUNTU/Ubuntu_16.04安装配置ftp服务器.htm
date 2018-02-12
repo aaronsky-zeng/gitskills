@@ -1,0 +1,297 @@
+﻿
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<title>Ubuntu 16.04安装配置ftp服务器_服务器应用_Linux公社-Linux系统门户网站</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+<link rel="icon" href="../../favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon"/>
+<meta name="description" content="Ubuntu 16.04安装vsftpd 使用下列命令安装 sudo apt-get install vsftpd 安装完后，ftp的配置文件在 /etc/vsftpd.conf 可以使用下"/>
+<meta name="keywords" content="Ubuntu 16.04安装ftp服务器,Ubuntu安装ftp服务器,Ubuntu 16.04安装配置ftp服务器,服务器,Linux服务器,Apache,Hadoop,集群,分布式,Nginx,Tomcat,分布式系统"/>
+<link rel="canonical" href="http://www.linuxidc.com/Linux/2016-09/135634.htm"/>
+<meta name="generator" content="Linux公社"/>
+<meta name="generator" content="Linux"/>
+<link rel="stylesheet" href="../../style/systems/style.css" type="text/css"/>
+<meta name="generator" content="专业的Linux网站"/>
+<script type="text/javascript" src="../../inc/jquery.js"></script>
+<script type="text/javascript" src="../../inc/iwms.js"></script>
+<script type="text/javascript">iwms.urlPrefix="../../";</script>
+
+<script type="text/javascript" src="../../inc/show.js"></script>
+</head>
+<body>
+<div class="topBar">
+	<div class="twidth">
+	
+	<div style="float:right">
+		<script type="text/javascript" src="../../inc/language.js"></script>
+	</div>
+	
+	<div id="topUser">你好，游客 <a href="#" onclick="iwms.logPop()">登录</a>
+	<a href="../../memberreg.aspx" rel="nofollow">注册</a>
+	<a href="../../search.aspx" rel="nofollow">搜索</a>
+	</div>
+	</div>
+</div>
+<div class="twidth">
+<div id="sitehead">
+<div class="l"></div>
+<div class="r"></div>
+<div class="m">
+	<table width="100%">
+	<tr align="center"><td width="160">
+	<a href="http://www.linuxidc.com/"><img style="filter: chroma(color=#FFFFFF);" src="../../pic/logo.jpg" alt="Linux公社" width="155" height="53" border="0" /></a>
+	</td><td>
+	<div align="center"><script type="text/javascript" src="/linuxfile/linux.js"></script></div>
+	</td>
+	</tr></table>
+</div>
+</div>
+<div id="navbar">
+<div class="l"></div>
+<div class="r"></div>
+<div class="m">
+	<a href="../../index.htm" class="first">首页</a><a href="../../it/">Linux新闻</a><a href="../../Linuxit/">Linux教程</a><a href="../../MySql/">数据库技术</a><a href="../../RedLinux/">Linux编程</a><a href="../../Apache/" class="thisclass">服务器应用</a><a href="../../Unix/">Linux安全</a><a href="../../download/">Linux下载</a><a href="../../Linuxrz/">Linux认证</a><a href="../../theme/">Linux主题</a><a href="../../Linuxwallpaper/">Linux壁纸</a><a href="../../linuxsoft/">Linux软件</a><a href="../../digi/">数码</a><a href="../../mobile/">手机</a><a href="../../diannao/">电脑</a>
+
+</div>
+</div>
+
+<div id="navsub">
+<div class="l"></div>
+<div class="r"></div>
+<div class="m">
+	<a href="../../index.htm">首页</a> → <a href="../../Apache/">服务器应用</a>
+</div>
+</div>
+<div class="linuxe1"><script type="text/javascript" src="/linuxfile/linuxe1.js"></script></div>
+<div class="linux1"><script type="text/javascript" src="/linuxfile/linux1.js"></script></div>
+<div class="linuxa"><script type="text/javascript" src="/linuxfile/linuxa.js"></script></div>
+<div class="linuxa1"><script type="text/javascript" src="/linuxfile/linuxa1.js"></script></div>
+<table id="middle" width="100%" cellspacing="0" cellpadding="0" style="table-layout:fixed">
+<tr valign="top"><td>
+
+	<div class="mframe mR">
+	<div class="tl"></div>
+	<div class="tr"></div>
+	<div class="tm">
+		<div class="moreR">
+			背景：<script type="text/javascript">WriteBg()</script>
+		</div>
+		<span class="tt">阅读新闻</span>
+	</div>
+	<div class="wrapper">
+	<div class="ml"></div>
+	<div class="mr"></div>
+	<div class="mm" id="bodyTd">
+		<div id="printBody" style="word-break:break-all;">
+			<div style="text-align:center"><h1 class="aTitle">Ubuntu 16.04安装配置ftp服务器</h1></div>
+			
+			<table width="97%" align="center">
+				<tr>
+				<td width="140">[日期：2016-09-29]</td>
+				<td align="center">来源：Linux社区&nbsp;
+				作者：Linux</td>
+				<td width="160" align="right">[字体：<a href="javascript:ContentSize(16)">大</a> <a href="javascript:ContentSize(0)">中</a> <a href="javascript:ContentSize(12)">小</a>]
+				</td></tr>
+			</table>
+<div id="li_all">
+<div id="li_1"><script type="text/javascript" src="/linuxfile/linux201.js"></script></div>
+<div id="li_2"><script type="text/javascript" src="/linuxfile/linux2.js"></script></div>
+</div>
+			<div id="content"><h2 id="安装vsftpd"><a href="http://www.linuxidc.com/topicnews.aspx?tid=2" target="_blank" title="Ubuntu">Ubuntu</a> 16.04安装vsftpd</h2>
+<p>使用下列命令安装</p>
+<pre class="prettyprint"><code class=" hljs bash"><span class="hljs-built_in">sudo</span> apt-get install vsftpd</code></pre>
+<p>安装完后，ftp的配置文件在</p>
+<pre class="prettyprint"><code class=" hljs avrasm">/etc/vsftpd<span class="hljs-preprocessor">.conf</span></code></pre>
+<p>可以使用下列命令来打开，关闭，重启ftp服务</p>
+<pre class="prettyprint"><code class=" hljs bash"><span class="hljs-built_in">sudo</span> /etc/init.d/vsftpd start
+<span class="hljs-built_in">sudo</span> /etc/init.d/vsftpd stop
+<span class="hljs-built_in">sudo</span> /etc/init.d/vsftpd restart</code></pre>
+<p>使用下列命令，可以看到系统中多了ftp用户组和ftp用户</p>
+<pre class="prettyprint"><code class=" hljs cs">cat /etc/<span class="hljs-keyword">group</span>
+cat /etc/passwd</code></pre>
+<p>ftp服务器的目录位置在 /srv/ftp， 这也是匿名用户访问时的根目录。 <br />可以使用下列命令来间接更改目录</p>
+<pre class="prettyprint"><code class=" hljs bash"><span class="hljs-built_in">cd</span> /srv
+<span class="hljs-built_in">sudo</span> rm <span class="hljs-operator">-d</span> ftp
+<span class="hljs-built_in">cd</span> ~/
+mkdir ftp
+<span class="hljs-built_in">sudo</span> ln <span class="hljs-operator">-s</span> ftp /srv/ftp</code></pre>
+<h2 id="配置vsftpdconf">配置vsftpd.conf</h2>
+<p>编辑/etc/vsftpd.conf文件:</p>
+<pre class="prettyprint"><code class=" hljs objectivec"><span class="hljs-comment">// 允许匿名用户登录</span>
+anonymous_enable=<span class="hljs-literal">YES</span>
+
+<span class="hljs-comment">// 允许本地用户登录</span>
+local_enable=<span class="hljs-literal">YES</span>
+
+<span class="hljs-comment">// 开启全局上传</span>
+write_enable=<span class="hljs-literal">YES</span>
+
+<span class="hljs-comment">// 允许匿名用户上传文件</span>
+anon_upload_enable=<span class="hljs-literal">YES</span>  
+
+<span class="hljs-comment">// 充许匿名用户新建文件夹</span>
+anon_mkdir_write_enable=<span class="hljs-literal">YES</span></code></pre>
+<h2 id="匿名用户登录">匿名用户登录</h2>
+<p>在/srv/ftp下建立pub用于匿名用户上传的文件，并更改其权限</p>
+<pre class="prettyprint"><code class=" hljs bash"><span class="hljs-built_in">cd</span> /srv/ftp
+<span class="hljs-built_in">sudo</span> mkdir pub
+<span class="hljs-built_in">sudo</span> chown ftp:ftp pub</code></pre>
+<p>然后用手机或电脑以匿名用户登录到ftp服务器，在浏览器中 或者 在文件浏览器的&ldquo;连接服务器&rdquo; 中输入下列地址，即可看到ftp服务器的目录(如果只是想看下，可以先使用匿名用户登录试下)</p>
+<pre class="prettyprint"><code class=" hljs cs">ftp:<span class="hljs-comment">//localhost</span>
+或
+ftp:<span class="hljs-comment">//127.0.0.1</span></code></pre>
+<p>可以看到根目录即是/srv/ftp目录： <br /><img title="" src="../../upload/2016_09/160929150413661.png" alt="这里写图片描述" /></p>
+<p>然后，进入到pub目录，上传一个文件夹或文件，这里我用的机上传了一个文件夹make_by_meizu，然后在ubuntu终端中查看手机上传的文件夹的详细信息： <br /><img title="" src="../../upload/2016_09/160929150413662.png" alt="这里写图片描述" /> <br />可以看到make_by_meizu的用户即用户组为ftp:ftp，所以ftp匿名用户即是以默认建立的ftp用户登录的，所以匿名用户要在pub上传文件或目录，pub的用户要为ftp。</p>
+<p><span style="color: #ff0000;">更多Ubuntu相关信息见</span><a title="Ubuntu" href="../../topicnews.aspx?tid=2" target="_self"><span style="color: #0000ff;">Ubuntu</span></a><span style="color: #ff0000;"> 专题页面 </span><span style="color: #0000ff;"><a title="Ubuntu" href="../../topicnews.aspx?tid=2" target="">http://www.linuxidc.com/topicnews.aspx?tid=2</a></span></p>
+<p><span style="font-size: small;"><strong>本文永久更新链接地址</strong></span>：<a href="../../Linux/2016-09/1356344.htm">http://www.linuxidc.com/Linux/2016-09/1356344.htm</a></p><a href="http://www.linuxidc.com" target="_blank"><img src="/linuxfile/logo.gif" alt="linux" width="15" height="17" /></div>
+<div class="linux3"><script type="text/javascript" src="/linuxfile/linux3.js"></script></div>
+<div class="linux302"><script type="text/javascript" src="/linuxfile/linux302.js"></script></div>		
+			
+			
+		</div>
+<div class="linuxfx"><script type="text/javascript" src="/linuxfile/fx.js"></script></div>	
+<div class="linux8"><script type="text/javascript" src="/linuxfile/linux8.js"></script></div>
+<div class="linux801"><script type="text/javascript" src="/linuxfile/linux801.js"></script></div>
+		<div class="nearNews">
+			<div class="prevNews"><a href="../../Linux/2016-09/135631.htm">Ubuntu 16.04环境中安装PHP7.0 Redis扩展</a></div>
+			<div class="nextNews"><a href="../../Linux/2016-09/135635.htm">Ubuntu 16.04下VSFTP服务器搭建</a></div>
+		</div>
+	</div>
+	</div>
+	<div class="bl"></div>
+	<div class="br"></div>
+	<div class="bm"></div>
+	</div>
+<div class="linux809"><script type="text/javascript" src="/linuxfile/linux809.js"></script></div>
+	<div class="mframe mR">
+	<div class="tl"></div>
+	<div class="tr"></div>
+	<div class="tm">
+		<span class="tt">相关资讯</span> &nbsp; &nbsp; &nbsp;
+		<a href="../../search.aspx?where=nkey&amp;keyword=46159" target="_blank">Ubuntu 16.04安装ftp服务器</a>&nbsp; <a href="../../search.aspx?where=nkey&amp;keyword=46160" target="_blank">Ubuntu安装ftp服务器</a>&nbsp; 
+	</div>
+	<div class="wrapper">
+	<div class="ml"></div>
+	<div class="mr"></div>
+	<div class="mm">
+		<ul class="nl">
+<li><a href="../../Linux/2017-01/139233.htm"  target="_blank"  title="Ubuntu 16.04 安装ftp服务器传输文件">Ubuntu 16.04 安装ftp服务器传输文</a>&nbsp; <span class="gray">(<span class="time">今 13:13</span>)</span></li>
+</ul>
+
+	</div>
+	</div>
+	<div class="bl"></div>
+	<div class="br"></div>
+	<div class="bm"></div>
+	</div>
+<div class="linux808"><script type="text/javascript" src="/linuxfile/linux808.js"></script></div>
+	
+	<div class="mframe mR">
+	<div class="tl"></div>
+	<div class="tr"></div>
+	<div class="tm">
+		<span class="tt">本文评论</span>
+		 	　　<a href="../../remark.aspx?id=135634" target="_blank">查看全部评论</a> <span class="gray">(0)</span>
+	</div>
+	<div class="wrapper">
+	<div class="ml"></div>
+	<div class="mr"></div>
+	<div class="mm">
+		<table width="100%" style="margin:6px">		
+		<tr><td width="50%">
+			<form action="" name="fmRemarkSt" onsubmit="return remark.post(this);">
+			<input type="hidden" value="1" name="face"/>
+			表情： <img src="../../pic/b.gif" alt="表情" class="face1" style="cursor:pointer;vertical-align:middle" onclick="remark.dispFace(this)" onmouseout="remark.hideFace()"/>
+			姓名： <input type="text" name="username" value="" maxlength="15" style="width:60px" class="inputbg"/>
+			<input type="checkbox" id="rmAnonymitySt" onclick="remark.anony(this)"/><label for="rmAnonymitySt">匿名</label>
+			字数 <input type="text" id="bodyLen" size="3" readonly="readonly" style="border-width:0;background:transparent;vertical-align:middle" value="0"/>
+			<br/>
+			<textarea name="body" cols="40" rows="4" onkeydown="remark.dispLen(this)" onkeyup="remark.handle(event,this);remark.dispLen(this)" style="width:39em;height:100px;margin:3px 0;overflow-y:auto"></textarea>
+				<br/>
+		　　　<input type="checkbox" checked="checked" id="rmAgreeSt"/><label for="rmAgreeSt">同意评论声明</label>
+		　　　<button type="submit" style="width:50px">发表</button>
+			</form><br>
+			评论声明
+			<ul style="list-style-type:square;margin:5px 0 0 1em;padding:0">
+			<li>尊重网上道德，遵守中华人民共和国的各项有关法律法规</li>
+			<li>承担一切因您的行为而直接或间接导致的民事或刑事法律责任</li>
+			<li>本站管理人员有权保留或删除其管辖留言中的任意内容</li>
+			<li>本站有权在网站内转载或引用您的评论</li>
+			<li>参与本评论即表明您已经阅读并接受上述条款</li>
+			</ul>
+		</td>
+		<td width="50%"><div class="linux799"><script type="text/javascript" src="/linuxfile/linux799.js"></script></div></td></tr>
+		</table>
+		<script type="text/javascript" src="../../inc/remark.js"></script>
+		<script type="text/javascript">
+			remark.maxSize=500;
+			remark.minSize=2;
+			remark.sourceEle=$(document.fmRemarkSt).find("button").get(0);
+			iwms.vCode="D2BDA41E";
+			iwms.user.name.length==0 ? $i("rmAnonymitySt").click() : $i("rmAnonymitySt").form.username.value=iwms.user.name;
+		</script>
+		<div class="reCont" id="reContainer"></div>
+	</div>
+	</div>
+	<div class="bl"></div>
+	<div class="br"></div>
+	<div class="bm"></div>
+	</div>
+	
+</td><td width="300" valign="top">
+<div class="linux901"><script type="text/javascript" src="/linuxfile/linux901.js"></script></div>
+<div class="linux902"><script type="text/javascript" src="/linuxfile/linux902.js"></script></div>
+<div class="linux903"><script type="text/javascript" src="/linuxfile/linux903.js"></script></div>
+<div class="linux905"><script type="text/javascript" src="/linuxfile/linux905.js"></script></div>
+	
+	<div class="lframe">
+	<div class="tl"></div>
+	<div class="tr"></div>
+	<div class="tm">
+		<span class="tt">最新资讯</span>
+	</div>
+	<div class="wrapper">
+	<div class="ml"></div>
+	<div class="mr"></div>
+	<div class="mm">
+		<ul class="nl">
+<li><a href="../../Linux/2017-01/139233.htm" target="_blank">Ubuntu 16.04 安装ftp服务器传输文件</a></li>
+<li><a href="../../Linux/2017-01/139232.htm" target="_blank" title="PHP ext/wddx/wddx.c拒绝服务漏洞(CVE-2016-9935)">PHP ext/wddx/wddx.c拒绝服务漏洞(CVE-2016</a></li>
+<li><a href="../../Linux/2017-01/139231.htm" target="_blank" title="PHP ext/standard/var.c拒绝服务漏洞(CVE-2016-9936)">PHP ext/standard/var.c拒绝服务漏洞(CVE-</a></li>
+<li><a href="../../Linux/2017-01/139230.htm" target="_blank" title="PHP gdImageFillToBorder函数拒绝服务漏洞(CVE-2016-9933)">PHP gdImageFillToBorder函数拒绝服务漏洞(</a></li>
+<li><a href="../../Linux/2017-01/139229.htm" target="_blank">PHP __wakeup拒绝服务漏洞(CVE-2016-9138)</a></li>
+<li><a href="../../Linux/2017-01/139228.htm" target="_blank">PHP CURLFile 拒绝服务漏洞(CVE-2016-9137)</a></li>
+<li><a href="../../Linux/2017-01/139227.htm" target="_blank" title="PHP ext/wddx/wddx.c拒绝服务漏洞(CVE-2016-9934)">PHP ext/wddx/wddx.c拒绝服务漏洞(CVE-2016</a></li>
+<li><a href="../../Linux/2017-01/139226.htm" target="_blank" title="Forza Horizon 3开发商不小心将推送给开发者的更新推送给了玩家">Forza Horizon 3开发商不小心将推送给开发</a></li>
+<li><a href="../../Linux/2017-01/139225.htm" target="_blank">Android是2016年漏洞发现最多的产品</a></li>
+<li><a href="../../Linux/2017-01/139224.htm" target="_blank">虚拟机VMware下CentOS 6.5无法访问外网解决</a></li>
+</ul>
+	</div>
+	</div>
+	<div class="bl"></div>
+	<div class="br"></div>
+	<div class="bm"></div>
+	</div>
+	<div class="u70"><script type="text/javascript" src="/linuxfile/u70.js"></script></div>
+	<div class="u80"><script type="text/javascript" src="/linuxfile/u80.js"></script></div>
+	<div class="u90"><script type="text/javascript" src="/linuxfile/u90.js"></script></div>
+	<div class="space"></div>
+	<div id="pin">
+	<script type="text/javascript" src="/linuxfile/pin.js"></script>
+	</div>
+</td></tr>
+</table>
+<div class="linux906"><script type="text/javascript" src="/linuxfile/linux906.js"></script></div>
+<div id="footer">
+<a href="http://www.linuxidc.com/aboutus.htm">Linux公社简介</a> - <a href="http://www.linuxidc.com/adsense.htm">广告服务</a> - <a href="http://www.linuxidc.com/sitemap.aspx">网站地图</a> - <a href="http://www.linuxidc.com/help.htm">帮助信息</a> - <a href="http://www.linuxidc.com/contactus.htm">联系我们</a><br />本站（LinuxIDC）所刊载文章不代表同意其说法或描述，仅为提供更多信息，也不构成任何建议。<br /><script type="text/javascript" src="/linuxfile/qq.js"></script><br />
+<script type="text/javascript" src="/linuxfile/foot.js"></script><br />Copyright &copy; 2006-2016　<a href="http://www.linuxidc.com/">Linux公社</a>　All rights reserved 沪ICP备15008072号-1号
+	<script type="text/javascript">iwms.aId=135634;$(function(){iwms.imgCont=$i('content');iwms.imgResize();InitContStyle();iwms.getVars();})</script>
+	
+</div>
+</div>
+<script type="text/javascript" src="/linuxren/linuxren1.js"></script>
+<script type="text/javascript" src="/linuxren/linuxren2.js"></script>
+<script type="text/javascript" src="/linuxren/linuxren3.js"></script>
+</body>
+</html>

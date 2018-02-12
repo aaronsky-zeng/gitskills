@@ -1,0 +1,15 @@
+# Boot image for the i.MX 6Dual/6Quad SABRE-SD board
+$ cd ~/myandroid
+$ source build/envsetup.sh
+$ lunch sabresd_6dq-user
+$ make bootimage
+
+
+
+The default configuration in the source code package takes internal eMMC as the boot storage. It can be changed to make the
+SD card in SD Slot 3 as the boot storage as follows:
+1. Remove /out/target/product/sabresd_6dq/root directory and boot*.img.
+2. Remove /out/target/product/sabresd_6dq/recovery directory and recovery*.img.
+3. Build the boot.img and recovery.img as follows:
+make bootimage BUILD_TARGET_DEVICE=sd
+make recoveryimage BUILD_TARGET_DEVICE=sd

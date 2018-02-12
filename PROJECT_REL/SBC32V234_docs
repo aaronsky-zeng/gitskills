@@ -1,0 +1,834 @@
+Readme first.txt
+* U-Boot is already Programmed in eMMC, hence the user has the option to boot the device directly from eMMC.
+* In Order to activate the HDMI controller following command must be executed from U-Boot:
+	- run dvi_on	/** this sets the i2c device 2 and writes required value in the corresponding address **/
+	- "dvi_on" command is already available in U-Boot Environments.
+-----------------------------------------------------------------------------------------------------------------------------
+Linux
+README.txt
+The Patches from MicroSys are already applied to the Source Code and the following Kernel Image and Device tree are generated:
+
+1. Linux Kernel Image - Image-bsp13
+2. Device tree - mpxs32v234-bsp13.dtb
+
+In Order to build a Linux Kernel please refer the Getting Started With Linux file.
+
+Getting started with linux-4.1.26_bsp13.0 for MPXS32V234-R2/CRXS32V
+===================================================================
+
+A, How to build new kernel and boot linux using NFS server
+----------------------------------------------------------
+
+Note: In the following example, the working directory is /home/work
+      We use the 32 bit toolschain and instal it to /home/work/eglibc-i686-aarch64-toolchain
+      
+
+1, install 32 or 64 bit toolchain in your working directory:
+
+   fsl-networking-eglibc-i686-aarch64-toolchain-QorIQ-SDK-V1.7.sh    (for 32 bit linux host)
+   fsl-networking-eglibc-x86_64-aarch64-toolchain-QorIQ-SDK-V1.7.sh  (for 64 bit linux host)
+
+2, unpack rootfs (rootfs-s32v23xx.tar.gz) to the NFS mount path on your host system (e.g. /tftpboot)
+
+3, unpack kernel source (linux-4.1.26_bsp13.0-microsys.tar.bz2) to your working directory
+
+	- Link for the Kernel Source : http://git.freescale.com/git/cgit.cgi/auto/linux.git/snapshot/linux-4.1.26_bsp13.0.tar.bz2
+
+4, open shell and set environment
+
+   linux-l4im:/home/work # source eglibc-i686-aarch64-toolchain/environment-setup-aarch64-fsl-linux
+   linux-l4im:/home/work # unset LDFLAGS
+
+5a, Applying Patches:
+    patch -p1 < mpxs32v234-evb-rev2-linux_bsp13.0-1.patch
+    patch -p1 < mpxs32v234-evb-rev2-linux_bsp13.0-2.patch
+    patch -p1 < mpxs32v234-evb-rev2-linux_bsp13.0-3_reboot_freeze_preliminary_workaround.patch
+   
+5b, compile linux linux kernel
+
+   linux-l4im:/home/work/linux-4.1.26_bsp13.0-microsys # make mpxs32v234_defconfig
+   linux-l4im:/home/work/linux-4.1.26_bsp13.0-microsys # make 
+
+6, copy kernel image and device tree file to your tftp server
+
+   linux-l4im:/home/work/linux-4.1.26_bsp13.0-microsys # mkdir /tftpboot/MPXS32V234-R2
+   linux-l4im:/home/work/linux-4.1.26_bsp13.0-microsys # cp arch/arm64/boot/Image /tftpboot/MPXS32V234-R2/Image-bsp13
+   linux-l4im:/home/work/linux-4.1.26_bsp13.0-microsys # cp arch/arm64/boot/dts/freescale/mpxs32v234.dtb /tftpboot/MPXS32V234-R2/mpxs32v234-bsp13.dtb
+   
+7, add the following entry to your /etc/exports file:
+
+    /opt/tftpboot/rootfs-s32v23xx  *(rw,no_root_squash,sync,no_subtree_check)
+
+    and re-start nfs server (e.g. rcnfsserver restart)
+
+8,  connect USB cable to CRXS32V console
+    connect ETHERNET cable to the LAN connector
+    connect power (12 V) to CRXS32V
+    insert SD Card to sdcard slot 1 (2 GByte)
+
+9,  configure kermit (.kermrc)
+    add the following lines to .kermrc
+
+    set line /dev/ttyS0
+    set speed 115200
+    set carrier-watch off
+    set handshake none
+    set flow-control none
+    robust
+    set file type bin
+    set file name lit
+    set rec pack 1000
+    set send pack 1000
+    set window 5
+    set prompt Linux Kermit>
+
+10, start kermit and connect to MPXS32V234-R2 board:
+
+linux:/home/josef # kermit .kermrc
+C-Kermit 8.0.209, 17 Mar 2003, for Linux
+ Copyright (C) 1985, 2003,
+  Trustees of Columbia University in the City of New York.
+Type ? or HELP for help.
+Linux Kermit>connect
+Connecting to /dev/ttyS0, speed 115200
+ Escape character: Ctrl-\ (ASCII 28, FS): enabled
+Type the escape character followed by C to get back,
+or followed by ? to see other options.
+
+
+U-Boot 2016.01 (Aug 04 2017 - 09:06:53 +0200)
+
+CPU:   NXP S32V234 at 1000 MHz
+Reset cause: unknown reset
+Board: mpxs32v234-R2
+I2C:   ready
+DRAM:  2 GiB
+All (4) cores are up.
+MMC:   FSL_SDHC: 0
+In:    serial
+Out:   serial
+Err:   serial
+Net:   FEC
+Warning: FEC MAC addresses don't match:
+Address in SROM is         00:1b:c3:12:34:22
+Address in environment is  00:40:42:03:f9:ad
+
+=> printenv
+baudrate=115200
+boot_fdt=try
+boot_mtd=booti
+bootdelay=5
+bootscript=echo Running bootscript from mmc ...; source
+console=ttyLF0
+cse_addr=CSE_BLOB_BASE
+cse_file=cse.bin
+dvi_on=i2c dev 2; i2c mw 3f 8 35
+ethact=FEC
+ethaddr=00:40:42:03:F9:AD
+fdt_addr=0x82000000
+fdt_file=MPXS32V234-R2/mpxs32v234-bsp13.dtb
+fdt_high=0xa0000000
+fileaddr=82000000
+filesize=454b
+image=MPXS32V234-R2/Image-bsp13
+initrd_high=0xffffffff
+ipaddr=192.168.0.102
+jtagboot=echo Booting using jtag...; ${boot_mtd} ${loadaddr} ${ramdisk_addr} ${fdt_addr}
+jtagsdboot=echo Booting loading Linux with ramdisk from SD...; run loadimage; run loadramdisk; run loadfdt;${boot_mtd} ${loadaddr} ${ramdisk_addr} ${fdt_addr}
+loadaddr=0x8007FFC0
+loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}
+loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}
+loadramdisk=fatload mmc ${mmcdev}:${mmcpart} ${ramdisk_addr} ${ramdisk}
+loadtftpfdt=tftp ${fdt_addr} ${fdt_file};
+loadtftpimage=tftp ${loadaddr} ${image};
+mmcargs=setenv bootargs console=${console},${baudrate} root=${mmcroot}
+mmcboot=echo Booting from mmc ...; run mmcargs; if test ${boot_fdt} = yes || test ${boot_fdt} = try; then if run loadfdt; then ${boot_mtd} ${loadaddr} - ${fdt_addr}; else if test ${boot_fdt} = try; then ${boot_mtd}; else echo WARN: Cannot load the DT; fi; fi; else ${boot_mtd}; fi;
+mmcdev=0
+mmcpart=1
+mmcroot=/dev/mmcblk0p2 rootwait rw
+myargs=setenv bootargs console=${console}:${baudrate} root=/dev/nfs rw ip=${ipaddr}:${serverip}::${netmask}::eth0:off nfsroot=${serverip}:${rootpath},v3,tcp debug ignore_loglevel log_buf_len=10M LOGLEVEL=8 sched_debug
+netargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp
+netboot=echo Booting from net ...; run netargs; if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; ${get_cmd} ${image}; if test ${boot_fdt} = yes || test ${boot_fdt} = try; then if ${get_cmd} ${fdt_addr} ${fdt_file}; then ${boot_mtd} ${loadaddr} - ${fdt_addr}; else if test ${boot_fdt} = try; then ${boot_mtd}; else echo WARN: Cannot load the DT; fi; fi; else ${boot_mtd}; fi;
+netmask=255.255.255.0
+nfsboot=echo Booting from net using tftp and nfs...; run nfsbootargs;run loadtftpimage; run loadtftpfdt;${boot_mtd} ${loadaddr} - ${fdt_addr};
+nfsbootargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs rw ip=${ipaddr}:${serverip}::${netmask}::eth0:off nfsroot=${serverip}:${rootpath},v3,nolock
+ramdisk=rootfs.uimg
+ramdisk_addr=0x84000000
+rootpath=/tftpboot/rootfs-s32v23xx
+script=boot.scr
+sec_boot_key_id=SECURE_BOOT_KEY_ID
+serial#=5495000031
+serverip=192.168.0.38
+stderr=serial
+stdin=serial
+stdout=serial
+update_sd_firmware=if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; if mmc dev ${mmcdev}; then if ${get_cmd} ${update_sd_firmware_filename}; then setexpr fw_sz ${filesize} / 0x200; setexpr fw_sz ${fw_sz} + 1; mmc write ${loadaddr} 0x8 ${fw_sz}; fi; fi
+update_sd_firmware_filename=u-boot.s32
+
+Environment size: 3168/8188 bytes
+
+=> run dvi_on
+Setting bus to 2
+
+=> run nfsboot
+Booting from net using tftp and nfs...
+Using FEC device
+TFTP from server 192.168.0.38; our IP address is 192.168.0.102
+Filename 'MPXS32V234-R2/Image-bsp13'.
+Load address: 0x8007ffc0
+Loading: #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #################################################################
+         #####
+         2.7 MiB/s
+done
+Bytes transferred = 7700320 (757f60 hex)
+Using FEC device
+TFTP from server 192.168.0.38; our IP address is 192.168.0.102
+Filename 'MPXS32V234-R2/mpxs32v234-bsp13.dtb'.
+Load address: 0x82000000
+Loading: ##
+         2.3 MiB/s
+done
+Bytes transferred = 18981 (4a25 hex)
+## Flattened Device Tree blob at 82000000
+   Booting using the fdt blob at 0x82000000
+   reserving fdt memory region: addr=80000000 size=10000
+   Loading Device Tree to 000000009fff8000, end 000000009ffffa24 ... OK
+
+Starting kernel ...
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Linux version 4.1.26-rt29 (root@linux-l4im) (gcc version 4.8.3 20140401 (prerelease) (Linaro GCC 4.8-2014.04) ) #6 SMP PREEMPT Tue Aug 29 10:50:30 CEST 2017
+[    0.000000] CPU: AArch64 Processor [410fd034] revision 4
+[    0.000000] Detected VIPT I-cache on CPU0
+[    0.000000] alternatives: enabling workaround for ARM erratum 845719
+[    0.000000] PERCPU: Embedded 16 pages/cpu @ffffffc07ff99000 s27776 r8192 d29568 u65536
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 512768
+[    0.000000] Kernel command line: console=ttyLF0,115200 root=/dev/nfs rw ip=192.168.0.102:192.168.0.38::255.255.255.0::eth0:off nfsroot=192.168.0.38:/tftpboot/rootfs-s32v23xx,v3,nolock
+[    0.000000] PID hash table entries: 4096 (order: 3, 32768 bytes)
+[    0.000000] Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes)
+[    0.000000] Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes)
+[    0.000000] software IO TLB [mem 0xf9e00000-0xfde00000] (64MB) mapped at [ffffffc079e00000-ffffffc07ddfffff]
+[    0.000000] Memory: 1973572K/2079744K available (5172K kernel code, 315K rwdata, 1784K rodata, 228K init, 398K bss, 106172K reserved, 0K cma-reserved)
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     vmalloc : 0xffffff8000000000 - 0xffffffbdffff0000   (   247 GB)
+[    0.000000]     vmemmap : 0xffffffbe00000000 - 0xffffffbfc0000000   (     7 GB maximum)
+[    0.000000]               0xffffffbe00000000 - 0xffffffbe01c00000   (    28 MB actual)
+[    0.000000]     fixed   : 0xffffffbffabfd000 - 0xffffffbffac00000   (    12 KB)
+[    0.000000]     PCI I/O : 0xffffffbffae00000 - 0xffffffbffbe00000   (    16 MB)
+[    0.000000]     modules : 0xffffffbffc000000 - 0xffffffc000000000   (    64 MB)
+[    0.000000]     memory  : 0xffffffc000000000 - 0xffffffc080000000   (  2048 MB)
+[    0.000000]       .init : 0xffffffc00074c000 - 0xffffffc000785000   (   228 KB)
+[    0.000000]       .text : 0xffffffc000080000 - 0xffffffc00074ba74   (  6959 KB)
+[    0.000000]       .data : 0xffffffc000789000 - 0xffffffc0007d7f60   (   316 KB)
+[    0.000000] Preemptible hierarchical RCU implementation.
+[    0.000000]  RCU dyntick-idle grace-period acceleration is enabled.
+[    0.000000]  Additional per-CPU info printed with stalls.
+[    0.000000] NR_IRQS:64 nr_irqs:64 0
+[    0.000000] Architected cp15 timer(s) running at 10.00MHz (virt).
+[    0.000000] clocksource arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x24e6a1710, max_idle_ns: 440795202120 ns
+[    0.000004] sched_clock: 56 bits at 10MHz, resolution 100ns, wraps every 4398046511100ns
+[    0.000352] Console: colour dummy device 80x25
+[    0.000364] Calibrating delay loop (skipped), value calculated using timer frequency.. 20.00 BogoMIPS (lpj=100000)
+[    0.000373] pid_max: default: 32768 minimum: 301
+[    0.000463] Security Framework initialized
+[    0.000512] Mount-cache hash table entries: 4096 (order: 3, 32768 bytes)
+[    0.000520] Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes)
+[    0.001187] hw perfevents: enabled with arm/armv8-pmuv3 PMU driver, 7 counters available
+[    0.080351] CPU1: Booted secondary processor
+[    0.080356] Detected VIPT I-cache on CPU1
+[    0.100335] CPU2: Booted secondary processor
+[    0.100341] Detected VIPT I-cache on CPU2
+[    0.120342] CPU3: Booted secondary processor
+[    0.120346] Detected VIPT I-cache on CPU3
+[    0.120424] Brought up 4 CPUs
+[    0.120448] SMP: Total of 4 processors activated.
+[    0.120452] CPU: All CPU(s) started at EL1
+[    0.120483] alternatives: patching kernel code
+[    0.121161] devtmpfs: initialized
+[    0.125042] clocksource jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.125440] pinctrl core: initialized pinctrl subsystem
+[    0.126183] NET: Registered protocol family 16
+[    0.160437] cpuidle: using governor ladder
+[    0.210146] cpuidle: using governor menu
+[    0.210221] vdso: 2 pages (1 code @ ffffffc000791000, 1 data @ ffffffc000790000)
+[    0.210260] hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+[    0.210424] DMA: preallocated 256 KiB pool for atomic allocations
+[    0.215026] s32v234-siul2-pinctrl 4006c240.siul2-pinctrl: initialized s32 pinctrl driver
+[    0.225792] ACPI: Interpreter disabled.
+[    0.229000] vgaarb: loaded
+[    0.229271] SCSI subsystem initialized
+[    0.229558] usbcore: registered new interface driver usbfs
+[    0.229619] usbcore: registered new interface driver hub
+[    0.229698] usbcore: registered new device driver usb
+[    0.230334] i2c i2c-0: IMX I2C adapter registered
+[    0.230374] i2c i2c-0: using dma0chan0 (tx) and dma0chan1 (rx) for DMA transfers
+[    0.230750] i2c i2c-1: IMX I2C adapter registered
+[    0.230781] i2c i2c-1: using dma0chan16 (tx) and dma0chan17 (rx) for DMA transfers
+[    0.231126] i2c i2c-2: IMX I2C adapter registered
+[    0.231153] i2c i2c-2: using dma0chan18 (tx) and dma0chan19 (rx) for DMA transfers
+[    0.231269] pps_core: LinuxPPS API ver. 1 registered
+[    0.231276] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.231307] PTP clock support registered
+[    0.232243] Switched to clocksource arch_sys_counter
+[    0.232681] pnp: PnP ACPI: disabled
+[    0.240598] NET: Registered protocol family 2
+[    0.241182] TCP established hash table entries: 16384 (order: 5, 131072 bytes)
+[    0.241350] TCP bind hash table entries: 16384 (order: 6, 262144 bytes)
+[    0.241651] TCP: Hash tables configured (established 16384 bind 16384)
+[    0.241737] UDP hash table entries: 1024 (order: 3, 32768 bytes)
+[    0.241792] UDP-Lite hash table entries: 1024 (order: 3, 32768 bytes)
+[    0.242015] NET: Registered protocol family 1
+[    0.242382] RPC: Registered named UNIX socket transport module.
+[    0.242390] RPC: Registered udp transport module.
+[    0.242396] RPC: Registered tcp transport module.
+[    0.242401] RPC: Registered tcp NFSv4.1 backchannel transport module.
+[    0.243713] futex hash table entries: 1024 (order: 4, 65536 bytes)
+[    0.244369] HugeTLB registered 2 MB page size, pre-allocated 0 pages
+[    0.245684] fuse init (API version 7.23)
+[    0.246578] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 249)
+[    0.246595] io scheduler noop registered
+[    0.246608] io scheduler deadline registered
+[    0.246651] io scheduler cfq registered (default)
+[    0.475519] PCI host bridge /pcie@0x72000000 ranges:
+[    0.475548]    IO 0x72f80000..0x72f8ffff -> 0x00000000
+[    0.475560]   MEM 0x72000000..0x72efffff -> 0x72000000
+[    0.475737] s32v234-pcie 72ffc000.pcie: PCI host bridge to bus 0000:00
+[    0.475750] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.475759] pci_bus 0000:00: root bus resource [io  0x0000-0xffff]
+[    0.475768] pci_bus 0000:00: root bus resource [mem 0x72000000-0x72efffff]
+[    0.475853] pci 0000:00:00.0: IOMMU is currently not supported for PCI
+[    0.476502] pci 0000:01:00.0: IOMMU is currently not supported for PCI
+[    0.476930] pci 0000:01:00.0: disabling ASPM on pre-1.1 PCIe device.  You can enable it with 'pcie_aspm=force'
+[    0.476982] pci 0000:00:00.0: BAR 0: assigned [mem 0x72000000-0x720fffff]
+[    0.476994] pci 0000:00:00.0: BAR 8: assigned [mem 0x72100000-0x721fffff]
+[    0.477004] pci 0000:00:00.0: BAR 6: assigned [mem 0x72200000-0x7220ffff pref]
+[    0.477017] pci 0000:01:00.0: BAR 0: assigned [mem 0x72100000-0x7210ffff 64bit]
+[    0.477060] pci 0000:00:00.0: PCI bridge to [bus 01]
+[    0.477070] pci 0000:00:00.0:   bridge window [mem 0x72100000-0x721fffff]
+[    0.477285] pcieport 0000:00:00.0: Signaling PME through PCIe PME interrupt
+[    0.477293] pci 0000:01:00.0: Signaling PME through PCIe PME interrupt
+[    0.478420] fsl_dcu 40028000.dcu: DCU: surface memory space is [0xC0000000, 0xC1000000].
+[    0.479192] fsl_dcu 40028000.dcu: Invalid display mode for <fb 0> (using defaults).
+[    0.479522] fsl_dcu 40028000.dcu: Invalid display mode for <fb 1> (using defaults).
+[    0.479838] fsl_dcu 40028000.dcu: Invalid display mode for <fb 2> (using defaults).
+[    0.480159] fsl_dcu 40028000.dcu: Invalid display mode for <fb 3> (using defaults).
+[    0.480474] fsl_dcu 40028000.dcu: Invalid display mode for <fb 4> (using defaults).
+[    0.480789] fsl_dcu 40028000.dcu: Invalid display mode for <fb 5> (using defaults).
+[    0.481104] fsl_dcu 40028000.dcu: Invalid display mode for <fb 6> (using defaults).
+[    0.481433] fsl_dcu 40028000.dcu: Invalid display mode for <fb 7> (using defaults).
+[    0.488120] 40053000.serial: ttyLF0 at MMIO 0x40053000 (irq = 23, base_baud = 4166666) is a FSL_LINFLEX
+[    1.262655] console [ttyLF0] enabled
+[    1.266725] 400bc000.serial: ttyLF1 at MMIO 0x400bc000 (irq = 40, base_baud = 4166666) is a FSL_LINFLEX
+[    1.276745] Unable to detect cache hierarcy from DT for CPU 0
+[    1.286870] loop: module loaded
+[    1.292940] libphy: Fixed MDIO Bus: probed
+[    1.297583] tun: Universal TUN/TAP device driver, 1.6
+[    1.302705] tun: (C) 1999-2004 Max Krasnyansky <maxk@qualcomm.com>
+[    1.309120] vcan: Virtual CAN interface driver
+[    1.313611] slcan: serial line CAN interface driver
+[    1.318522] slcan: 10 dynamic interface channels.
+[    1.323273] CAN device driver interface
+[    1.327964] flexcan 40055000.flexcan: device registered (reg_base=ffffff80000c8000, irq=24)
+[    1.337152] flexcan 400be000.flexcan: device registered (reg_base=ffffff80000ca000, irq=41)
+[    1.346258] pps pps0: new PPS source ptp0
+[    1.351392] libphy: fec_enet_mii_bus: probed
+[    1.356827] fec 40032000.ethernet eth0: registered PHC device 0
+[    1.363039] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    1.369620] ehci-pci: EHCI PCI platform driver
+[    1.374288] usbcore: registered new interface driver usb-storage
+[    1.388071] rtc rtc0: invalid alarm value: 2017-8-29 43:45:65
+[    1.394093] rtc-pcf85263 2-0051: rtc core: registered rtc-pcf85263 as rtc0
+[    1.401023] rtc-pcf85263 2-0051: PCF85263 RTC (irqpin=None irq=0)
+[    1.407210] i2c /dev entries driver
+[    1.411790] sac58r-wdt 4000a000.swt: SAC58R Watchdog Timer Registered. timeout=30s (nowayout=0)
+[    1.420725] sdhci: Secure Digital Host Controller Interface driver
+[    1.426962] sdhci: Copyright(c) Pierre Ossman
+[    1.431354] sdhci-pltfm: SDHCI platform and OF driver helper
+[    1.437761] /soc/aips-bus@40000000/usdhc@4005D000: voltage-ranges unspecified
+[    1.445010] sdhci-esdhc-imx 4005d000.usdhc: No vmmc regulator found
+[    1.451325] sdhci-esdhc-imx 4005d000.usdhc: No vqmmc regulator found
+[    1.502268] mmc0: SDHCI controller on 4005d000.usdhc [4005d000.usdhc] using ADMA
+[    1.519900] usbcore: registered new interface driver usbhid
+[    1.527500] usbhid: USB HID core driver
+[    1.542912] NET: Registered protocol family 10
+[    1.548112] sit: IPv6 over IPv4 tunneling driver
+[    1.550181] mmc0: host does not support reading read-only switch, assuming write-enable
+[    1.556342] mmc0: new high speed SD card at address 59b4
+[    1.556669] mmcblk0: mmc0:59b4 USD   1.87 GiB
+[    1.557604]  mmcblk0: p1 p2
+[    1.574048] NET: Registered protocol family 17
+[    1.578540] can: controller area network core (rev 20120528 abi 9)
+[    1.584824] NET: Registered protocol family 29
+[    1.589344] can: raw protocol (rev 20120528)
+[    1.593666] can: broadcast manager protocol (rev 20120528 t)
+[    1.599376] can: netlink gateway (rev 20130117) max_hops=1
+[    1.604971] Key type dns_resolver registered
+[    1.609914] registered taskstats version 1
+[    1.615467] rtc-pcf85263 2-0051: setting system clock to 2017-08-29 11:31:42 UTC (1504006302)
+[    1.712361] fec 40032000.ethernet eth0: Freescale FEC PHY driver [Micrel KSZ9031 Gigabit PHY] (mii_bus:phy_addr=40032000.etherne:01, irq=-1)
+[    1.725648] IPv6: ADDRCONF(NETDEV_UP): eth0: link is not ready
+[    5.713027] fec 40032000.ethernet eth0: Link is Up - 1Gbps/Full - flow control rx/tx
+[    5.722266] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+[    5.742376] IP-Config: Complete:
+[    5.745629]      device=eth0, hwaddr=00:40:42:03:f9:ad, ipaddr=192.168.0.102, mask=255.255.255.0, gw=255.255.255.255
+[    5.756254]      host=192.168.0.102, domain=, nis-domain=(none)
+[    5.762218]      bootserver=192.168.0.38, rootserver=192.168.0.38, rootpath=
+[    5.787039] VFS: Mounted root (nfs filesystem) on device 0:15.
+[    5.793908] devtmpfs: mounted
+[    5.796713] Freeing unused kernel memory: 228K (ffffffc00074c000 - ffffffc000785000)
+[    5.804256] Freeing alternatives memory: 8K (ffffffc000785000 - ffffffc000787000)
+INIT: version 2.88 booting
+Starting udev
+[    7.526996] udevd[627]: starting version 182
+[    8.074709] random: dd urandom read with 74 bits of entropy available
+[    8.409009] kjournald starting.  Commit interval 5 seconds
+[    8.415091] EXT3-fs (mmcblk0p2): using internal journal
+[    8.419966] EXT3-fs (mmcblk0p2): mounted filesystem with ordered data mode
+[    8.426910] FAT-fs (mmcblk0p1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
+INIT: Entering runlevel: 5
+Configuring network interfaces... ifup skipped for nfsroot interface eth0
+run-parts: /etc/network/if-pre-up.d/nfsroot exited with code 1
+Starting OpenBSD Secure Shell server: sshd
+done.
+Starting rpcbind daemon...done.
+starting statd: done
+Starting atd: OK
+starting DNS forwarder and DHCP server: dnsmasq... done.
+Starting network benchmark server: netserver.
+NFS daemon support not enabled in kernel
+Starting Who daemon   rwhod done
+Starting system log daemon...[   10.429956] random: nonblocking pool is initialized
+0
+Starting kernel log daemon...0
+Starting internet superserver: xinetd.
+
+Poky (Yocto Project Reference Distro) 1.8 s32v234evb /dev/ttyLF0
+
+s32v234evb login: root
+
+root@s32v234evb:~# date
+Tue Aug 29 11:31:55 UTC 2017
+
+How to test CAN interface
+-------------------------
+
+ATTENTION: can termination (DIP switch 'TERM' 1/2) must be ON
+           Link between CAN 0 and CAN 1 must be installed
+           
+root@s32v234evb:/i2c-tools-3.0.2/tools# echo 6 >/sys/class/gpio/export
+root@s32v234evb:/i2c-tools-3.0.2/tools# echo "out" >/sys/class/gpio/gpio6/direction
+root@s32v234evb:/i2c-tools-3.0.2/tools# echo 0 >/sys/class/gpio/gpio6/value
+
+root@s32v234evb:/i2c-tools-3.0.2/tools# echo 7 >/sys/class/gpio/export
+root@s32v234evb:/i2c-tools-3.0.2/tools# echo "out" >/sys/class/gpio/gpio7/direction
+root@s32v234evb:/i2c-tools-3.0.2/tools# echo 0 >/sys/class/gpio/gpio7/value
+
+root@s32v234evb:/i2c-tools-3.0.2/tools# ip link set can0 up type can bitrate 1000000
+[  359.121104] flexcan 40055000.flexcan can0: writing ctrl=0x01342006
+[  359.127086] IPv6: ADDRCONF(NETDEV_CHANGE): can0: link becomes ready
+
+root@s32v234evb:/i2c-tools-3.0.2/tools# ip link set can1 up type can bitrate 1000000
+[  367.254105] flexcan 400be000.flexcan can1: writing ctrl=0x01342006
+[  367.260044] IPv6: ADDRCONF(NETDEV_CHANGE): can1: link becomes ready
+
+root@s32v234evb:/i2c-tools-3.0.2/tools# cd /canbus/can-utils
+
+root@s32v234evb:/canbus/can-utils# ./candump can1&
+[1] 956
+root@s32v234evb:/canbus/can-utils# ./cansend can0 5A1#11.2233.44556677.88
+  can1  5A1  [8] 11 22 33 44 55 66 77 88
+root@s32v234evb:/canbus/can-utils# ./cansend can0 5A1#11.2233.44556677.88
+  can1  5A1  [8] 11 22 33 44 55 66 77 88
+root@s32v234evb:/canbus/can-utils# ./cansend can0 5A1#11.2233.44556677.88
+  can1  5A1  [8] 11 22 33 44 55 66 77 88
+root@s32v234evb:/canbus/can-utils#  
+
+How to scan i2c devices
+-----------------------
+
+root@s32v234evb:/i2c-tools-3.0.2/tools# ./i2cdetect -y 0
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: 50 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+70: -- -- -- -- -- -- -- --
+root@s32v234evb:/i2c-tools-3.0.2/tools# ./i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+70: -- -- -- -- -- -- -- --
+root@s32v234evb:/i2c-tools-3.0.2/tools# ./i2cdetect -y 2
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 3f
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+50: -- UU -- -- -- -- -- -- -- -- -- -- -- -- -- --
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+70: -- -- -- -- -- -- -- --
+
+how to view pcie devices
+------------------------
+
+root@s32v234evb:~# lspci -v
+00:00.0 PCI bridge: Freescale Semiconductor Inc Device 4001 (rev 01) (prog-if 00 [Normal decode])
+        Flags: bus master, fast devsel, latency 0, IRQ 113
+        Memory at 72000000 (32-bit, non-prefetchable) [size=1M]
+        Bus: primary=00, secondary=01, subordinate=01, sec-latency=0
+        Memory behind bridge: 72100000-721fffff
+        [virtual] Expansion ROM at 72200000 [disabled] [size=64K]
+        Capabilities: [40] Power Management version 3
+        Capabilities: [50] MSI: Enable+ Count=1/1 Maskable+ 64bit+
+        Capabilities: [70] Express Root Port (Slot-), MSI 00
+        Capabilities: [100] Advanced Error Reporting
+        Kernel driver in use: pcieport
+lspci: Unable to load libkmod resources: error -12
+
+01:00.0 Network controller: Qualcomm Atheros AR928X Wireless Network Adapter (PCI-Express) (rev 01)
+        Subsystem: Qualcomm Atheros Device 3099
+        Flags: fast devsel, IRQ 72
+        Memory at 72100000 (64-bit, non-prefetchable) [disabled] [size=64K]
+        Capabilities: [40] Power Management version 2
+        Capabilities: [50] MSI: Enable- Count=1/1 Maskable- 64bit-
+        Capabilities: [60] Express Legacy Endpoint, MSI 00
+        Capabilities: [90] MSI-X: Enable- Count=1 Masked-
+        Capabilities: [100] Advanced Error Reporting
+        Capabilities: [140] Virtual Channel
+        Capabilities: [160] Device Serial Number 00-00-00-00-00-00-00-00
+
+
+
+how to check SDCARD read performance
+------------------------------------
+
+root@s32v234evb:~# hdparm -tT /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing cached reads:   1570 MB in  2.00 seconds = 784.49 MB/sec
+ Timing buffered disk reads:  66 MB in  3.02 seconds =  21.82 MB/sec
+root@s32v234evb:~
+
+
+how to check eMMC read performance
+----------------------------------
+
+- set boot switch to eMMC and boot linux
+
+root@s32v234evb:~# hdparm -tT /dev/mmcblk0
+
+/dev/mmcblk0:
+ Timing cached reads:   1246 MB in  2.00 seconds = 623.40 MB/sec
+ Timing buffered disk reads: 106 MB in  3.05 seconds =  34.78 MB/sec
+root@s32v234evb:~#
+
+Test HDMI display
+-----------------
+
+root@s32v234evb:~# cd /images
+
+root@s32v234evb:/images# ls -l
+total 8100
+-rwxr-xr-x 1 root root 8294400 Mar 13 11:44 Test.raw
+
+root@s32v234evb:/images# dd if=Test.raw of=/dev/fb0
+16200+0 records in
+16200+0 records out
+8294400 bytes (8.3 MB) copied, 0.276542 s, 30.0 MB/s
+root@s32v234evb:/images#
+
+root@s32v234evb:/images# reboot
+
+Broadcast message from root@s32v234evb (ttyLF0) (Tue Aug 29 11:33:16 2017):
+The system is going down for reboot NOW!
+INIT: Switching ô
+INIT: Sending processes the TERM signal
+INIT: Sendi Stopping OpenBSD Secure Shell server: sshdstopped /usr/sbin/sshd (pid 879)
+.
+Stopping atd: OK
+stopping DNS forwarder and DHCP server: dnsmasq... stopped /usr/bin/dnsmasq (pid 897)
+done.
+Stopping network benchmark server: netserverstopped /usr/sbin/netserver (pid 900)
+.
+stopping mountd: done
+stopping nfsd: done
+Stopping Who daemon   rwhod done
+Stopping system log daemon...0
+Stopping kernel log daemon...0
+Stopping internet superserver: xinetd.
+stopping statd: done
+Stopping rpcbind daemon...
+done.
+not deconfiguring network interfaces: network file systems still mounted.
+Sending all processes the TERM signal...
+Sending all processes the KILL signal...
+Unmounting remote filesystems...
+Deactivating swap...
+Unmounting local filesystems...
+Rebooting... [  110.600794] reboot: Restarting systÿ
+
+U-Boot 2016.01 (Aug 04 2017 - 09:06:53 +0200)
+
+CPU:   NXP S32V234 at 1000 MHz
+Reset cause: Software Functional reset
+Board: mpxs32v234-R2
+I2C:   ready
+DRAM:  2 GiB
+All (4) cores are up.
+MMC:   FSL_SDHC: 0
+In:    serial
+Out:   serial
+Err:   serial
+Net:   FEC
+Warning: FEC MAC addresses don't match:
+Address in SROM is         00:1b:c3:12:34:22
+Address in environment is  00:40:42:03:f9:ad
+
+=>
+------------------------------------------------------------------------------------------------------------------------------
+UBOOT
+README.txt
+Achtung: der patch ist bereits im gepackten source code enthalten !
+
+
+* Info : The Patch is already applied and added to the U-Boot source tar file, 
+* You can find the corresponding U-Boot binary "Binaries/u-boot-2016.01_bsp13.0-sdcard.s32" in U-Boot directory.
+* In order to build U-Boot from scratch please refer Getting Started with U-Boot file.
+
+UBOOT environment SBC32V234
+NOTE: In Order to start the HDMI controller please : run the following command in U-Boot:
+=> run dvi_on
+
+=>printenv
+baudrate=115200
+boot_fdt=try
+boot_mtd=booti
+bootcmd=run dvi_on; run loadimage; run mmcboot
+bootdelay=5
+bootscript=echo Running bootscript from mmc ...; source
+console=ttyLF0
+cse_addr=CSE_BLOB_BASE
+cse_file=cse.bin
+dvi_on=i2c dev 2; i2c mw 3f 8 35
+ethact=FEC
+ethaddr=00:40:42:03:F9:DC
+fdt_addr=0x82000000
+fdt_file=MPXS32V234-R2/mpxs32v234-bsp12.dtb
+fdt_high=0xa0000000
+fileaddr=81000000
+filesize=48000
+image=MPXS32V234-R2/Image-bsp12
+initrd_high=0xffffffff
+ipaddr=192.168.0.104
+jtagboot=echo Booting using jtag...; ${boot_mtd} ${loadaddr} ${ramdisk_addr} ${fdt_addr}
+jtagsdboot=echo Booting loading Linux with ramdisk from SD...; run loadimage; run loadramdisk; run loadfdt;${boot_mtd} ${loadaddr} ${ramdisk_addr} ${fdt_addr}
+loadaddr=0x8007FFC0
+loadbootscript=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};
+loadfdt=fatload mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}
+loadimage=fatload mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}
+loadramdisk=fatload mmc ${mmcdev}:${mmcpart} ${ramdisk_addr} ${ramdisk}
+loadtftpfdt=tftp ${fdt_addr} ${fdt_file};
+loadtftpimage=tftp ${loadaddr} ${image};
+mmcargs=setenv bootargs console=${console},${baudrate} root=${mmcroot}
+mmcboot=echo Booting from mmc ...; run mmcargs; if test ${boot_fdt} = yes || test ${boot_fdt} = try; then if run loadfdt; then ${boot_mtd} ${loadaddr} - ${fdt_addr}; else if test ${boot_fdt} = try; then ${boot_mtd}; else echo WARN: Cannot load the DT; fi; fi; else ${boot_mtd}; fi;
+mmcdev=0
+mmcpart=1
+mmcroot=/dev/mmcblk0p2 rootwait rw
+netargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp
+netboot=echo Booting from net ...; run netargs; if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; ${get_cmd} ${image}; if test ${boot_fdt} = yes || test ${boot_fdt} = try; then if ${get_cmd} ${fdt_addr} ${fdt_file}; then ${boot_mtd} ${loadaddr} - ${fdt_addr}; else if test ${boot_fdt} = try; then ${boot_mtd}; else echo WARN: Cannot load the DT; fi; fi; else ${boot_mtd}; fi;
+netmask=255.255.255.0
+nfsboot=echo Booting from net using tftp and nfs...; run nfsbootargs;run loadtftpimage; run loadtftpfdt;${boot_mtd} ${loadaddr} - ${fdt_addr};
+nfsbootargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs rw ip=${ipaddr}:${serverip}::${netmask}::eth0:off nfsroot=${serverip}:${rootpath},v3,nolock 
+ramdisk=rootfs.uimg
+ramdisk_addr=0x84000000
+rootpath=/opt/tftpboot/rootfs-s32v23xx
+script=boot.scr
+sdboot=run mmcargs; ext2load mmc ${mmcdev}:2 ${loadaddr} boot/Image-bsp12; ext2load mmc ${mmcdev}:2 ${fdt_addr} boot/mpxs32v234-bsp12.dtb; ${boot_mtd} ${loadaddr} - ${fdt_addr}
+sec_boot_key_id=SECURE_BOOT_KEY_ID
+serial#=5495000078
+serverip=192.168.0.10
+stderr=serial
+stdin=serial
+stdout=serial
+update_sd_firmware=if test ${ip_dyn} = yes; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; if mmc dev ${mmcdev}; then if ${get_cmd} ${update_sd_firmware_filename}; then setexpr fw_sz ${filesize} / 0x200; setexpr fw_sz ${fw_sz} + 1; mmc write ${loadaddr} 0x8 ${fw_sz}; fi; fi
+update_sd_firmware_filename=u-boot.s32
+
+Environment size: 3181/8188 bytes
+
+Getting started with U-BOOT
+﻿u-boot-2016.01_bsp13.0 for MPXS32V234-R2
+========================================
+
+U-Boot source without patches can be found here : http://git.freescale.com/git/cgit.cgi/auto/u-boot.git/snapshot/u-boot-2016.01_bsp13.0.tar.bz2
+
+U-Boot source with patches : u-boot-2016.01_bsp13.0-microsys.tar.bz2
+
+32 bit host:
+
+linux-l4im:/home/josef # source eglibc-i686-aarch64-toolchain/environment-setup-aarch64-fsl-linux
+
+bzw (64 bit host):
+
+linux-l4im:/home/josef # source eglibc-x86_64-aarch64-toolchain/environment-setup-aarch64-fsl-linux
+
+linux-l4im:/home/josef # unset LDFLAGS
+
+
+MPXS32V234 SDCARD boot :
+======================
+
+linux-l4im:/home/josef/s32/u-boot-2016.01_bsp13.0-microsys # make mpxs32v234_defconfig
+linux-l4im:/home/josef/s32/u-boot-2016.01_bsp13.0-microsys # make
+linux-l4im:/home/josef/s32/u-boot-2016.01_bsp13.0-microsys # cp u-boot.s32 /tftpboot/MPXS32V234-R2/u-boot-2016.01_bsp13.0-sdcard.s32
+linux-l4im:/home/josef/s32/u-boot-2016.01_bsp13.0-microsys # dd if=/tftpboot/MPXS32V234-R2/u-boot-2016.01_bsp13.0-sdcard.s32 of=/dev/<sdx> bs=512 seek=8&&sync
+
+
+MPXS32V234 eMMC boot : 
+======================
+
+1. Create MPXS32V234-R2 Directory in TFTP server.
+2. Copy u-boot-2016.01_bsp13.0-sdcard.s32 the MPXS32V234-R2 Directory
+3. Please refer to SBC-S32V_User_Manual.pdf for connection specific details.
+3. Boot SBC32v234 in SD-Boot mode (Refer to SBC-S32V_User_Manual.pdf -> Page 35 - Section 5.3 "Boot Mode Switch")
+
+====================
+U-Boot 2016.01 (Aug 04 2017 - 09:06:53 +0200)
+
+CPU:   NXP S32V234 at 1000 MHz
+Reset cause: unknown reset
+Board: mpxs32v234-R2
+I2C:   ready
+DRAM:  2 GiB
+All (4) cores are up.
+MMC:   FSL_SDHC: 0
+In:    serial
+Out:   serial
+Err:   serial
+Net:   FEC
+Hit any key to stop autoboot:  0
+
+=> tftp 81000000 MPXS32V234-R2/u-boot-2016.01_bsp13.0-sdcard.s32
+Using FEC device
+TFTP from server 192.168.0.38; our IP address is 192.168.0.100
+Filename 'MPXS32V234-R2/u-boot-2016.01_bsp13.0-sdcard.s32'.
+Load address: 0x81000000
+Loading: #####################
+         2.6 MiB/s
+done
+Bytes transferred = 294912 (48000 hex)
+
+=> mmcinfo
+Device: FSL_SDHC
+Manufacturer ID: 74
+OEM: 4a60
+Name: USD
+Tran Speed: 50000000
+Rd Block Len: 512
+SD version 3.0
+High Capacity: No
+Capacity: 1.9 GiB
+Bus Width: 4-bit
+Erase Group Size: 512 Bytes
+
+- Switch to eMMc Boot Mode: Refer to SBC-S32V_User_Manual.pdf -> Page 35 - Section 5.3 "Boot Mode Switch"
+
+=> mmc rescan
+
+=> mmcinfo
+Device: FSL_SDHC
+Manufacturer ID: 13
+OEM: 14e
+Name: R1J56
+Tran Speed: 52000000
+Rd Block Len: 512
+MMC version 5.0
+High Capacity: Yes
+Capacity: 13.8 GiB
+Bus Width: 8-bit
+Erase Group Size: 512 KiB
+HC WP Group Size: 8 MiB
+User Capacity: 13.8 GiB WRREL
+Boot Capacity: 16 MiB ENH
+RPMB Capacity: 128 KiB ENH
+
+=> mmc erase 0 600
+
+MMC erase: dev # 0, block # 0, count 1536 ...
+
+Caution! Your devices Erase group is 0x400
+The erase range would be change to 0x0~0x7ff
+
+1536 blocks erased: OK
+
+=> mmc write 81000000 8 600
+
+MMC write: dev # 0, block # 8, count 1536 ... 1536 blocks written: OK
+=> reset
+resetting ...
+
+
+U-Boot 2016.01 (Aug 04 2017 - 09:06:53 +0200)
+
+CPU:   NXP S32V234 at 1000 MHz
+Reset cause: Software Functional reset
+Board: mpxs32v234-R2
+I2C:   ready
+DRAM:  2 GiB
+All (4) cores are up.
+MMC:   FSL_SDHC: 0
+*** Warning - bad CRC, using default environment
+
+In:    serial
+Out:   serial
+Err:   serial
+Net:   FEC
+Hit any key to stop autoboot:  0
+=>
+=> setenv dvi_on 'i2c dev 2; i2c mw 3f 8 35'
+=> setenv image MPXS32V234-R2/Image-bsp12
+=> setenv fdt_file MPXS32V234-R2/mpxs32v234-bsp12.dtb
+=> saveenv
+Saving Environment to MMC...
+Writing to MMC(0)... done
+=>
+-----------------------------
+How to create an SD-Card with U-Boot, RootFS and Linux Kernel Image:
+
+Login to a Linux System:
+
+1. Insert SD-Card
+2. create Partition for the SD card using:
+	- fdisk </dev/sdx> 
+	- delete the existing partition with option 'd'.
+	- create new linux partition with option 'n'.
+	- start sector should begin from '4096'.
+	- end sector can be default.
+	- save and exit with option 'w'.
+3. dd if=u-boot-2016.01_bsp13.0-sdcard.s32 of=/dev/<sdx> bs=512 seek=8&&sync /* here <sdx> is the sd card device name*/
+4. mount the /dev/<sdx1> to mnt
+	- sudo mount /dev/sdc1 /mnt/
+5. Extract the rootfs
+	- sudo tar -jxvf rootfs-s32v23xx.tar.bz2 -C /mnt/
+6. copy 
+	- Device tree : mpxs32v234-bsp13.dtb &
+	- Kernel Image : Image-bsp13 to /mnt/boot.
+7. In order to boot from SD-Card please refer : U-Boot_Environment_SBC32V234.txt environment variable
+	- run sdboot

@@ -1,0 +1,39 @@
+交互命令： sudo update-alternatives --config java && sudo update-alternatives --config javac && sudo update-alternatives --config javap
+查看命令： java -version;javac -version;javap -version
+
+
+1）。查看安装了那些java：
+wtmecnxp@wtmecnxp:/disk2/workstation/S32V234/yocto_auto_linux_bsp15.0$ update-java-alternatives -l
+java-1.7.0-openjdk-amd64 1071 /usr/lib/jvm/java-1.7.0-openjdk-amd64
+java-1.8.0-openjdk-amd64 1069 /usr/lib/jvm/java-1.8.0-openjdk-amd64
+
+2.）查看当前用的是那套java：
+wtmecnxp@wtmecnxp:/disk2/workstation/S32V234/yocto_auto_linux_bsp15.0$ java -version
+java version "1.7.0_151"
+OpenJDK Runtime Environment (IcedTea 2.6.11) (7u151-2.6.11-2ubuntu0.14.04.1)
+OpenJDK 64-Bit Server VM (build 24.151-b01, mixed mode)
+wtmecnxp@wtmecnxp:/disk2/workstation/S32V234/yocto_auto_linux_bsp15.0$ javac -version
+javac 1.7.0_151
+wtmecnxp@wtmecnxp:/disk2/workstation/S32V234/yocto_auto_linux_bsp15.0$ javap -version
+1.7.0_151
+
+3.）How to switch between different versions?  run the follwing command from the terminal:
+
+	$ sudo update-alternatives --config java
+	There are 2 choices for the alternative java (providing /usr/bin/java).
+
+	Selection    Path                                            Priority   Status
+	------------------------------------------------------------
+	0            /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java   1071      auto mode
+	1            /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java   1071      manual mode
+	* 2            /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java   1069      manual mode
+
+	Press enter to keep the current choice[*], or type selection number:
+
+	As you can see I'm running open jdk 8. 
+	To switch to to jdk 7, press 1 and hit the Enter key. 
+	Do the same for javac,javap,javadoc as well with,:
+
+	$ sudo update-alternatives --config javac
+	$ sudo update-alternatives --config javap
+	$ sudo update-alternatives --config javadoc（我还没有用到这个）

@@ -1,0 +1,16 @@
+1.先安装wine
+sudo apt-get install wine
+安装完的wine在～/.wine
+
+2.下载Si3572Setup.exe
+
+3.安装si：
+	$wine Si3572Setup.exe
+
+4.安装完后，进～/.wine,其中drive_c表示C盘。
+
+5.卸载si
+	$wine Si3572Setup.exe选择remove
+
+4.在把～/.wine里的si删除。
+
