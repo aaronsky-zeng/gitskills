@@ -40,4 +40,4 @@ git config --global user.email "aaron.zeng@wtmec.com"
 	git push -u origin master //将本地库中修改推送到远程库.第一次推送-u。
  
 5.git pull --rebase origin master
-将GitHub库里的文件下载到本地。
+将GitHub库里的文件下载到本地,保持更新。
