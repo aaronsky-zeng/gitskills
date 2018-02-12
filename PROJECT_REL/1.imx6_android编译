@@ -131,7 +131,7 @@ $ cd ~/myandroid/bootable
 $ mkdir bootloader
 $ cd bootloader
 $ git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx
-(sudo git clone git://git.freesle.com/imx/uboot-imx.git uboot-imx)
+(sudo git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx)
 $ cd uboot-imx
 $ git checkout n7.1.2_2.0.0-ga (此时是没有属于的branch的，游离的状态)
 

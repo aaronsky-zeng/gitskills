@@ -28,11 +28,11 @@ $ sudo apt-get install device-tree-compiler
 	java-1.7.0-openjdk-amd64 1071 /usr/lib/jvm/java-1.7.0-openjdk-amd64
 
 	To install Java 8, I did,
-
-	$ sudo add-apt-repository ppa:openjdk-r/ppa
-	$ sudo apt-get update
-	$ sudo apt-get install openjdk-8-jdk
-
+		_____________________________________________
+		$ sudo add-apt-repository ppa:openjdk-r/ppa
+		$ sudo apt-get update
+		$ sudo apt-get install openjdk-8-jdk
+		---------------------------------------------
 	Afterwards, now I have java 7 and 8,
 
 	$ update-java-alternatives -l
@@ -40,7 +40,7 @@ $ sudo apt-get install device-tree-compiler
 	java-1.8.0-openjdk-amd64 1069 /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
 	How to switch between different versions?  run the follwing command from the terminal:
-
+	__________________________________________________________
 	$ sudo update-alternatives --config java
 	There are 2 choices for the alternative java (providing /usr/bin/java).
 
@@ -52,12 +52,13 @@ $ sudo apt-get install device-tree-compiler
 
 	Press enter to keep the current choice[*], or type selection number:
 
-	As you can see I'm running open jdk 8. To switch to to jdk 7, press 1 and hit the Enter key. Do the same for javac,javap,javadoc as well with,:
-
+	As you can see I'm running open jdk 8. To switch to to jdk 7, press 1 and hit the Enter key. 
+	Do the same for javac,javap,javadoc as well with,:
+	___________________________________________
 	$ sudo update-alternatives --config javac
 	$ sudo update-alternatives --config javap
 	$ sudo update-alternatives --config javadoc
-
+	---------------------------------------------
 	配置：
 	vim ~/.bashrc
 		
@@ -99,7 +100,10 @@ $ ~/bin/repo init -u https://android.googlesource.com/platform/manifest -b andro
 
 这条会被屏蔽，所以将 https://android.googlesource.com/ 全部使用 https://aosp.tuna.tsinghua.edu.cn/ 代替。
 即： repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-7.1.2_r9
-  
+  =============================================================================================
+	这里需要插入一段内容：
+	除了从网站直接下之外，还可以copy其他机器上已经下载完成的.repo,这将节省很多时间。
+  =============================================================================================
 $ ~/bin/repo sync 
 # This command loads most needed repos. Therefore, it can take several hours to load.
 # clone bpt.git from google repo, and checkout to the b7c3059e5d8c408f60222edc898ef1c229d8fc2d commit.
@@ -127,7 +131,7 @@ $ cd ~/myandroid/bootable
 $ mkdir bootloader
 $ cd bootloader
 $ git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx
-(sudo git clone git://git.freesle.com/imx/uboot-imx.git uboot-imx)
+(sudo git clone git://git.freescale.com/imx/uboot-imx.git uboot-imx)
 $ cd uboot-imx
 $ git checkout n7.1.2_2.0.0-ga (此时是没有属于的branch的，游离的状态)
 

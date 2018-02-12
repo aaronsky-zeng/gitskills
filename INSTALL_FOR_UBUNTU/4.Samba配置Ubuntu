@@ -16,14 +16,20 @@ sudo gedit /etc/samba/smb.conf
    public = yes
    writable = yes
    available = yes
+   valid users = smb
 
 4.重启
 sudo /etc/init.d/samba restart
 
+5.添加系统帐号
+$sudo useradd smb
+$sudo smbpasswd -a smb
+-----------------------------------------------------------
+OR,
 5.添加系统账号
 sudo groupadd share -g 6000
 sudo useradd share -u 6000 -s /shin/nologin -d /dev/null
-
+-----------------------------------------------------------
 6.使用：
 打开我的电脑，右键“添加一个网络位置”
 
