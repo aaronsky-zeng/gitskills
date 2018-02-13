@@ -31,7 +31,7 @@ git config --global user.email "aaron.zeng@wtmec.com"
 	vim README.md	//修改文件
 	
 	git status	//查看改动的文件
-	git add .	//将修改后的文件添加到库中
+	git add .	//将修改后的文件添加到库中 //很多文件，有增有删：git add --all
 		----此时如想反悔，git reset HEAD filename。如果是多个文件都想反悔，将filename
 			改为 “.”
 	git commit -m "rewrite readme,redirect this git as Docs for install/compile imx,s32v"

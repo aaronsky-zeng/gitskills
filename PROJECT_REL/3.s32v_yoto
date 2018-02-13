@@ -29,9 +29,22 @@ java-1.8.0-openjdk-amd64 1069 /usr/lib/jvm/java-1.8.0-openjdk-amd64
 
 如何切换呢？执行：
    sudo update-alternatives --config java && sudo update-alternatives --config javac && sudo update-alternatives --config javap
+通过上下键来切换。
 
 查看切换后的状态：
 	java -version;javac -version;javap -version;
 
-（2）.
+（2）.demo板是s32v234evb的可以执行如下命令：
+        source poky/fsl-setup-poky -m s32v234evb
+我手上只有SBC32V的板子，没有查到相关资料具体命令的操作。
+但是可以实验一下，我用上面的这条指令先下载yocto，然后用microsys提供的UBOOT，linux来替换。
+
+（3）接着继续，为s32v234evb板子到来做准备
+如果想要添加GPU驱动，需要设置CMA大小32MB，通过：
+	bitbake virtual/kernel -c menuconfig
+选择 Device Drivers -> Generic Driver Options -> [*]DMA Contiguous Memory Allocator ->
+set(32) Size in Mega Bytes instead of 16(default)
+
+（4）以上都完成后，执行：bitbake fsl-image-s32v2xx
+生成u-boot,kernel,modules,rootfs 在 <builddirectory>/tmp/deploy/images
 
