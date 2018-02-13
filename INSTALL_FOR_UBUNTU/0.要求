@@ -1,0 +1,9 @@
+
+机器硬件要求：16G内存，1T硬盘。
+OS：ubuntu14.04
+
+系统安装完成之后：
+sudo apt-get update
+sudo apt-get install vim
+
+用于修改配置文件。
