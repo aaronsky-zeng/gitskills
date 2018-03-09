@@ -98,7 +98,30 @@ echo "Android source is ready for the build"
 真实的执行是这样的：
 在/home/wtmecnxp/workstation/imx8M目录下执行source ./imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh
 在报“无法连接https://android.googlesource.com”错误的时候，按照第二部分的第5点来修改。
+修改完之后，重新回到目录/home/wtmecnxp/workstation/imx8M，执行source ./imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh
 这里会花几个小时。
+
+在执行的过程中会因为网络原因断开，
+我写了一个脚本sourceinstall.sh：
+        #!/bin/bash
+	cd /home/wtmecnxp/workstation/imx8M
+	source imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh
+	rc=$?
+
+	while [ "$rc" != 0 ]; do
+    	    cd ..
+    	    source imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh
+    	    rc=$?
+	done
+	echo "finished!!!!!!!!!"
+这个脚本会一遍一遍的执行source命令，直到完成所有操作。
+当然也可以在imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh的repo sync命令处直接修改脚本，一旦无故退出，马上重新repo sync：
+	rc=1
+	while [ "$rc" != 0 ]; do
+    	    repo sync
+    	    rc=$?
+	done
+以上两种方法选一种实现。
 
 
 
