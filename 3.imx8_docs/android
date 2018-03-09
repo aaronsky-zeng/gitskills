@@ -123,6 +123,66 @@ echo "Android source is ready for the build"
 	done
 以上两种方法选一种实现。
 
+以后每次单独repo sync代码如果因为网络的问题出错，用下面的脚本直接运行。
+	--------------在~/workstation/imx8M/android_build下的reposyncscript.sh-----------------------
+	|	#!/bin/bash
+	|
+	|	cd ~/workstation/imx8M/android_build
+	|	rc=1
+	|	while [ "$rc" != 0 ]; do
+    	|	    sudo ~/bin/repo sync
+    	|	    rc=$?
+	|	done
+	|	echo "repo sync finished!!!!!!!!"
+	----------------------------------------------------------------------
+
+四。
+将~/workstation/imx8M/android_build作为默认工作目录
+    export MY_ANDROID=~/workstation/imx8M/android_build
+	------------------------------------以下这部分是对wifi校准----------------------------------------------
+	|   The default release package does not include the 1CQ (QCA6174A) calibrated Wi-Fi firmware. 
+	|   To use Wi-Fi, perform the following steps:
+	|	1. Fetch murata's public git for the calibrated firmware.
+	|	The github source URL is 
+	|		https://github.com/murata-wireless/qca-linux-calibration.git, 
+	|	and the branch for calibrated firmware is i.MX8x-1cq-morty.
+	|	The destination path is external/qca-linux. 
+	|	You can adjust the path, but you need to change the path in the next changes applied as well.
+	|		$cd {$MYANDORID}/external
+	|		$git clone https://github.com/murata-wireless/qca-linux-calibration.git -b i.MX8x-1cqmorty qca-linux
+
+	|	2. Apply the following changes to ${MY_ANDROID}/device/fsl.
+	|	
+	|		diff --git a/imx8/evk_8mq.mk b/imx8/evk_8mq.mk
+	|		index c7aafe3..e056503 100644
+	|		--- a/imx8/evk_8mq.mk
+	|		+++ b/imx8/evk_8mq.mk
+	|		@@ -136,9 +136,9 @@ PRODUCT_PACKAGES += \
+	|		# Qcom WiFi Firmware
+	|		PRODUCT_COPY_FILES += \
+	|		- $(IMX_FIRMWARE_PATH)/linux-firmware/qca/nvm_00130302.bin:vendor/firmware/
+	|		nvm_tlv_3.2.bin \
+	|		+ external/qca-linux/1CQ/nvm_tlv_3.2.bin:vendor/firmware/nvm_tlv_3.2.bin \
+	|		+ external/qca-linux/1CQ/board.bin:vendor/firmware/ath10k/QCA6174/hw3.0/board.bin \
+	|		$(IMX_FIRMWARE_PATH)/linux-firmware/qca/rampatch_00130302.bin:vendor/firmware/
+	|		rampatch_tlv_3.2.tlv \
+	|		- $(IMX_FIRMWARE_PATH)/linux-firmware/ath10k/QCA6174/hw3.0/board.bin:vendor/
+	|		firmware/ath10k/QCA6174/hw3.0/board.bin \
+	|		$(IMX_FIRMWARE_PATH)/linux-firmware/ath10k/QCA6174/hw3.0/board-2.bin:vendor/
+	|		firmware/ath10k/QCA6174/hw3.0/board-2.bin \
+	|		$(IMX_FIRMWARE_PATH)/linux-firmware/ath10k/QCA6174/hw3.0/firmware-4.bin:vendor/
+	|		firmware/ath10k/QCA6174/hw3.0/firmware-4.bin
+	----------------------------------------------------------------------------------------------------------------------
+
+五。
+Build Name is the Android device name found in ${MY_ANDROID}/device/fsl
+编译：
+	-------------------------出现权限问题，用su来编译----------------------	
+	|	cd ${MY_ANDROID}
+	|	source build/envsetup.sh
+	|	lunch evk_8mq-userdebug        //or evk_8mq-user,evk_8mq-eng
+	|	make 2>&1 | tee build-log.txt
+	----------------------------------------------------------------------
 
 
 
