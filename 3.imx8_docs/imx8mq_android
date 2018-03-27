@@ -184,5 +184,34 @@ Build Name is the Android device name found in ${MY_ANDROID}/device/fsl
 	|	make 2>&1 | tee build-log.txt
 	----------------------------------------------------------------------
 
+六。
+将编译完的img等烧写入emmc或者tf卡
+1.对imx8m开发板有一个基本的认识。
+开发板有三个模式：启动模式，下载模式，fuse模式。通过SW802这个拨码开关来实现选择。
+fuse模式没有用过。
+启动模式分：emmc启动，tf卡启动。通过sw801这个拨码开关来选择。
+下载模式：用MFGtools在windows下，下载img到emmc/tf时使用。
 
+2.MFGtools这里不介绍，但是需要注意的一点是：我实验过win10，xp，win7的64位系统，都识别不了端口。
+只有win7的32位可以下载。
+这里来介绍一下在linux下，下载你编译生成的img。
 
+准备一张tf卡。
+第一步，格式化这张tf卡。
+
+第二步，找到生成的img目录：/home/wtmecnxp/workstation/imx8M/android_build/out/target/product/evk_8mq，
+将boot-imx8mq.img,partition-table.img,system.img,vendor.img,u-boot-imx8mq.imx,vbmeta-imx8mq.img
+copy到
+/home/wtmecnxp/workstation/imx8M/android_build/device/fsl/common/tools
+下。
+
+第三步，
+cd /home/wtmecnxp/workstation/imx8M/android_build/device/fsl/common/tools
+sudo chmod +x fsl-sdcard-partition.sh
+sudo ./fsl-sdcard-partition.sh -f imx8mq /dev/sdc
+
+说明一下，SD卡选的是16G的，如果是其他大小，参考手册。
+插入tf卡之后，可以看一下/dev/sd*,找到那张相应的tf卡。
+执行过程可能会在10分钟左右。
+
+完成烧写之后，将tf卡插入卡槽，调整拨码开关，就可以上电起动了。
