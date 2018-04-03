@@ -1,0 +1,144 @@
+#
+# Product-specific compile-time definitions.
+#
+
+include device/fsl/imx8/soc/imx8mq.mk
+include device/fsl/evk_8mq/build_id.mk
+include device/fsl/imx8/BoardConfigCommon.mk
+ifeq ($(PREBUILT_FSL_IMX_CODEC),true)
+-include $(FSL_CODEC_PATH)/fsl-codec/fsl-codec.mk
+endif
+
+（1）
+# sabreauto_6dq default target for EXT4
+BUILD_TARGET_FS ?= ext4                        #这行里 ?= 的意思是：BUILD_TARGET_FS的值如果是以ext4结尾的，那么...（默认的是ext4）
+include device/fsl/imx8/imx8_target_fs.mk
+
+ifeq ($(BUILD_TARGET_FS),ubifs)
+  TARGET_RECOVERY_FSTAB = device/fsl/evk_8mq/fstab_nand.freescale
+  # build ubifs for nand devices
+  PRODUCT_COPY_FILES +=	\
+	  device/fsl/evk_8mq/fstab_nand.freescale:root/fstab.freescale
+else
+	ifneq ($(BUILD_TARGET_FS),f2fs)
+		--------------------用的是这部分---------------------------
+		TARGET_RECOVERY_FSTAB = device/fsl/evk_8mq/fstab.freescale
+		# build for ext4
+		PRODUCT_COPY_FILES +=	\
+		device/fsl/evk_8mq/fstab.freescale:root/fstab.freescale
+		------------------------------------------------------------------	
+	else
+		TARGET_RECOVERY_FSTAB = device/fsl/evk_8mq/fstab-f2fs.freescale
+		# build for f2fs
+		PRODUCT_COPY_FILES +=	\
+			device/fsl/evk_8mq/fstab-f2fs.freescale:root/fstab.freescale
+	endif # BUILD_TARGET_FS
+
+（2）
+  # Support gpt
+  BOARD_BPT_INPUT_FILES += device/fsl/common/partition/device-partitions-13GB-ab.bpt             #默认是16GB
+  ADDITION_BPT_PARTITION = partition-table-7GB:device/fsl/common/partition/device-partitions-7GB-ab.bpt \        #8GB
+                         partition-table-28GB:device/fsl/common/partition/device-partitions-28GB-ab.bpt        
+
+endif # BUILD_TARGET_FS
+
+****************************************************************************************************************
+# Vendor Interface Manifest
+PRODUCT_COPY_FILES += \
+	device/fsl/evk_8mq/manifest.xml:vendor/manifest.xml
+
+TARGET_BOOTLOADER_BOARD_NAME := EVK
+
+PRODUCT_MODEL := EVK_8MQ
+
+TARGET_BOOTLOADER_POSTFIX := bin
+
+USE_OPENGL_RENDERER := true
+TARGET_CPU_SMP := true
+
+SKIP_BOOTCTRL_COPY := true
+
+TARGET_RELEASETOOLS_EXTENSIONS := device/fsl/imx8
+BOARD_WLAN_DEVICE            := qcwcn
+WPA_SUPPLICANT_VERSION       := VER_0_8_X
+BOARD_WPA_SUPPLICANT_DRIVER  := NL80211
+BOARD_HOSTAPD_DRIVER         := NL80211
+
+BOARD_HOSTAPD_PRIVATE_LIB               := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB        := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
+
+BOARD_VENDOR_KERNEL_MODULES += \
+                            $(KERNEL_OUT)/drivers/net/wireless/ath/ath.ko \
+                            $(KERNEL_OUT)/drivers/net/wireless/ath/ath10k/ath10k_core.ko \
+                            $(KERNEL_OUT)/drivers/net/wireless/ath/ath10k/ath10k_pci.ko
+
+PHONE_MODULE_INCLUDE := flase
+BOARD_USE_SENSOR_FUSION := true
+
+# for recovery service
+TARGET_SELECT_KEY := 28
+# we don't support sparse image.
+TARGET_USERIMAGES_SPARSE_EXT_DISABLED := false
+
+UBOOT_POST_PROCESS := true
+
+# camera hal v3
+IMX_CAMERA_HAL_V3 := true
+
+BOARD_HAVE_USB_CAMERA := true
+
+USE_ION_ALLOCATOR := true
+USE_GPU_ALLOCATOR := false
+
+PRODUCT_COPY_FILES +=	\
+       device/fsl/evk_8mq/ueventd.freescale.rc:root/ueventd.freescale.rc
+
+BOARD_AVB_ENABLE := true
+
+# define frame buffer count
+NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
+
+（3）
+#默认的uboot中的cmdline
+BOARD_KERNEL_CMDLINE := console=ttymxc0,115200 earlycon=imxuart,0x30860000,115200 init=/init video=HDMI-A-1:1920x1080-32@60 androidboot.console=ttymxc0 consoleblank=0 androidboot.hardware=freescale cma=800M
+
+# Qcom 1CQ(QCA6174) BT
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/fsl/evk_8mq/bluetooth
+BOARD_HAVE_BLUETOOTH_QCOM := true
+BOARD_HAS_QCA_BT_ROME := true
+BOARD_HAVE_BLUETOOTH_BLUEZ := false
+QCOM_BT_USE_SIBS := true
+ifeq ($(QCOM_BT_USE_SIBS), true)
+    WCNSS_FILTER_USES_SIBS := true
+endif
+
+ifeq ($(TARGET_USERIMAGES_USE_UBIFS),true)
+ifeq ($(TARGET_USERIMAGES_USE_EXT4),true)
+$(error "TARGET_USERIMAGES_USE_UBIFS and TARGET_USERIMAGES_USE_EXT4 config open in same time, please only choose one target file system image")
+endif
+endif
+**********************************************************************************************************
+（4）
+TARGET_BOARD_DTS_CONFIG := imx8mq:fsl-imx8mq-evk.dtb imx8mq-mipi:fsl-imx8mq-evk-lcdif-adv7535.dtb
+TARGET_BOOTLOADER_CONFIG := imx8mq:mx8mq_evk_android_defconfig                 
+	#uboot的配置文件mx8mq_evk_android_defconfig
+	#在android_build下 find . -name mx8mq_evk_android_defconfig
+	#在vendor/nxp-opensource下找到uboot-imx/configs/mx8mq_evk_android_defconfig
+	#dts： uboot-imx/arch/arm/dts/fsl-imx8mq-evk.dts
+	#
+	#kernel在/vendor/nxp-opensource/kernel-imx																				
+																				
+
+BOARD_SEPOLICY_DIRS := \
+       device/fsl/imx8/sepolicy \
+       device/fsl/evk_8mq/sepolicy
+
+# Vendor seccomp policy files for media components:
+PRODUCT_COPY_FILES += \
+       device/fsl/evk_8mq/seccomp/mediacodec-seccomp.policy:vendor/etc/seccomp_policy/mediacodec.policy \
+       device/fsl/evk_8mq/seccomp/mediaextractor-seccomp.policy:vendor/etc/seccomp_policy/mediaextractor.policy
+
+PRODUCT_COPY_FILES += \
+       device/fsl/evk_8mq/app_whitelist.xml:system/etc/sysconfig/app_whitelist.xml
+
+TARGET_BOARD_KERNEL_HEADERS := device/fsl/common/kernel-headers
