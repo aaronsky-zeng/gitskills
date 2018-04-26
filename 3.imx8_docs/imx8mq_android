@@ -49,7 +49,53 @@ android_builddir=$WORKSPACE/android_build
         manifests  manifests.git  manifest.xml  project-objects  projects  repo
   这里mainfest.xml同manifests/imx-o8.0.0_1.3.0_8mq-prc.xml内容一样。
   这就是为什么在repo init 指令中加上 -m 的原因。
-的：
+
+4.rc=$? 
+这个意思是：上个命令退出状态，或者函数返回值。
+
+5.执行 repo sync
+这里一定会出错。
+无法连接https://android.googlesource.com的错。
+打开manifest.xml，如果remote段的fetch地址是https://android.googlesource.com的，改为fetch="https://aosp.tuna.tsinghua.edu.cn"
+我们在打开的manifest.xml中没有发现googlesource的地址。
+但是发现<include name="aosp-O8.0.0-1.3.0.xml"/>
+于是找到这个aosp-O8.0.0-1.3.0.xml文件，find . -name aosp-O8.0.0-1.3.0.xml
+在./manifests/aosp-O8.0.0-1.3.0.xml
+修改为：
+    ----------------------------------------------
+        <remote  name="aosp"
+           fetch="https://aosp.tuna.tsinghua.edu.cn/"
+    -------------------------------------------------
+
+同时，修改 .repo/manifests.git/config，将
+url = https://android.googlesource.com/platform/manifest
+更改为
+url = https://aosp.tuna.tsinghua.edu.cn/platform/manifest
+
+如果.repo/manifests.git/config的“url”不是googlesource，
+是url = https://source.codeaurora.org/external/imx/imx-manifest.git
+或者其他的地址，用网页打开试一下，看能不能打开。如果能打开，那么url就不用改了。
+
+保存后重新执行sync
+
+6.执行剩下的：
+cd $WORKSPACE/imx-o8.0.0_1.3.0_8mq-prc
+cp -r vendor/nxp $android_builddir/vendor
+cp -r EULA.txt $android_builddir
+cp -r SCR* $android_builddir
+
+cd $android_builddir
+
+# unset variables
+
+unset android_builddir
+unset WORKSPACE
+
+echo "Android source is ready for the build"
+
+三。
+上面第二部分分析了imx_android_setup.sh这个脚本。
+真实的执行是这样的：
 在/home/wtmecnxp/workstation/imx8M目录下执行source ./imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh
 在报“无法连接https://android.googlesource.com”错误的时候，按照第二部分的第5点来修改。
 修改完之后，重新回到目录/home/wtmecnxp/workstation/imx8M，执行source ./imx-o8.0.0_1.3.0_8mq-prc/imx_android_setup.sh
