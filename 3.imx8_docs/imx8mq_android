@@ -78,6 +78,12 @@ url = https://aosp.tuna.tsinghua.edu.cn/platform/manifest
 
 保存后重新执行sync
 
+	----------------------------------------------------------------------------------
+	一个月后repo sync时出现 error: .repo/manifests/: contains uncommitted changes 这样的错误提示。
+	从字面意思上看是代码有改动但是没有commit。不用担心，如下操作：
+	 进入cd .repo/manifests，运行git stash后再运行git clean -d -f来还原改动记录。然后再把第5点改动一遍。就可以repo sync了。
+	-------------------------------------------------------------------------------------------------
+
 6.执行剩下的：
 cd $WORKSPACE/imx-o8.0.0_1.3.0_8mq-prc
 cp -r vendor/nxp $android_builddir/vendor
