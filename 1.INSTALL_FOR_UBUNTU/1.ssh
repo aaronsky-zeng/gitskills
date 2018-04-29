@@ -19,7 +19,8 @@ PermitRootLogin yes
 	
 	ssh wtmecnxp@10.5.66.99
 	123456
-	
+	If use virtual machine pls use bridge mode.
+
 5文件的传输使用方法
 （1）、上传本地文件到服务器
 scp /path/filename username@servername:/path/
