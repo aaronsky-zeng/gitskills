@@ -1,0 +1,20 @@
+i.MX Linux Yocto Project BSP 4.9.51_8mq_ga Release
+=====================================================
+
+   * NXP i.MX 8MQuad EVK (imx8mqevk)
+
+   * i.MX U-Boot configurations for each machine
+     imx8mq - sd
+
+Quick Start Guide
+-----------------
+
+$: repo init -u git://source.codeaurora.org/external/imx/imx-manifest.git -b imx-linux-morty -m imx-4.9.51-8mq_ga.xml
+
+$: repo sync
+
+If errors on repo init, remove the .repo directory and try repo init again.
+
+$:DISTRO=fsl-imx-wayland MACHINE=imx8mqevk source fsl-setup-release.sh -b build-wayland
+$: bitbake fsl-image-qt5-validation-imx
+
