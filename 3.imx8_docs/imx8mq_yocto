@@ -18,3 +18,10 @@ If errors on repo init, remove the .repo directory and try repo init again.
 $:DISTRO=fsl-imx-wayland MACHINE=imx8mqevk source fsl-setup-release.sh -b build-wayland
 $: bitbake fsl-image-qt5-validation-imx
 
+
+Additional:
+To find where uboot is:
+aaron@ubuntu:~/workstation/imx8m_yocto_bsp$ DISTRO=fsl-imx-wayland MACHINE=imx8mqevk source fsl-setup-release.sh -b build-wayland
+aaron@ubuntu:~/workstation/imx8m_yocto_bsp/build-wayland$ bitbake -e u-boot | grep "^S="
+S="/home/aaron/workstation/imx8m_yocto_bsp/build-wayland/tmp/work/imx8mqevk-poky-linux/u-boot-imx/2017.03-r0/git"
+
