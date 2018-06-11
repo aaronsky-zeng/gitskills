@@ -48,3 +48,21 @@ set(32) Size in Mega Bytes instead of 16(default)
 （4）以上都完成后，执行：bitbake fsl-image-s32v2xx
 生成u-boot,kernel,modules,rootfs 在 <builddirectory>/tmp/deploy/images
 
+-------------------------------------------------------------------------
+PORTING FILES FROM OTHER PC
+
+bitbake xxxx
+
+--------------------------------------------------------------- 
+ERROR:  OE-core's config sanity checker detected a potential misconfiguration.
+    Either fix the cause of this error or at your own risk disable the checker (see sanity.conf).
+    Following is the list of potential problems / advisories:
+
+    Error, TMPDIR has changed location. You need to either move it back to /home/aaron/workstation_S32V/S32V234-EVB/yocto_auto_linux_bsp15.0/build_s32v234evb28899_release/tmp or rebuild
+----------------------------------------------------------------
+
+TMPDIR is not /home/aaron/workstation_S32V/S32V234-EVB/yocto_auto_linux_bsp15.0/build_s32v234evb28899_release/tmp
+
+which shows in $vim sanity_info
+
+the easy way to rebuild the yocto is to creating "workstation_S32V/S32V234-EVB" in "/home/aaron".
