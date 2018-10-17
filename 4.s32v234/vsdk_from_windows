@@ -1,0 +1,23 @@
+1.copy vsdk from windows,put is at :
+~/workstation_S32V/s32v234_sdk
+
+2.
+export ARCH=arm
+export PATH=/home/aaron/workstation_S32V/s32v234sbc/manually_for_LinuxBSP_components/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-elf/bin:$PATH
+export PATH=/home/aaron/workstation_S32V/s32v234sbc/manually_for_LinuxBSP_components/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin:$PATH
+export PATH=/home/aaron/workstation_S32V/s32v234sbc/manually_for_LinuxBSP_components/gcc-linaro-6.3.1-2017.05-x86_64_arm-eabi/bin:$PATH
+export S32V234_VSDK_DIR=/home/aaron/workstation_S32V/s32v234_sdk/
+export APU_COMP=nxp
+export APU_TOOLS=/home/aaron/NXP/APU_Compiler_v1.0
+export PATH=/home/aaron/NXP/APU_Compiler_v1.0/bin:$PATH
+
+3.
+cd /home/aaron/workstation_S32V/s32v234_sdk/isp/graphs
+tar jxvf ov10640_surround_external_isp.tar.bz2
+
+4.
+cd /home/aaron/workstation_S32V/s32v234_sdk/demos/isp
+tar jxvf isp_ov10635_quad.tar.bz2
+cd isp_ov10635_quad/build-v234ce-gnu-linux-d
+make allsub
+
