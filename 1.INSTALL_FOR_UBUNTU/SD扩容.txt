@@ -1,0 +1,106 @@
+﻿SD卡扩容
+
+1.将编译好的imx8qm image拷贝到SD卡：
+$ bunzip2 fsl-image-qt5-validation-imx-imx8qmmek.sdcard.bz2
+$ sudo dd if=fsl-image-qt5-validation-imx-imx8qmmek.sdcard of=/dev/sdb bs=1M && sync
+
+将烧录完成的SD卡插入imx8qmmek板可以启动。将开发板接入公司网络，imx8qmmek的ip地址是10.5.66.27
+
+将SV3D上传至imx8qmmek
+$ sudo scp -r SV3D-1.1 root@10.5.66.27:/home/root/
+报错：no space...
+
+怎么会呢？这个卡是16G的啊。。。
+
+将SD卡重新插回pc，发现，SD卡的boot大小是32M，rootfs大小是1.6G剩下的空间都没有被用上。
+
+下面摩拳擦掌，开始给SD卡扩容啦：
+-----------------------------------------------------------------------------------------------
+将SD卡插入imx8qmmek
+sudo df -h 查看各个目录大小，/dev/root/使用了88%。
+
+1.查看整个存储空间：
+root@imx8qmmek:~# cat /proc/partitions
+major minor  #blocks  name
+
+  31        0      65536 mtdblock0
+  
+ 179        0   30539776 mmcblk0
+ 179      128       4096 mmcblk0rpmb
+ 179       64       8192 mmcblk0boot1
+ 179       32       8192 mmcblk0boot0
+ 
+ 179       96      ***** mmcblk1
+ 179       97      32768 mmcblk1p1
+ 179       98      ***** mmcblk1p2
+ 
+ 2.查看SD卡分区，并调整大小：
+ root@imx8qmmek:~# sudo fdisk /dev/mmcblk1
+
+Welcome to fdisk (util-linux 2.28.1).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): p
+Disk /dev/mmcblk1: 15.6 GiB, 16777216000 bytes, 32768000 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x34e14c4b
+
+Device         Boot Start      End  Sectors  Size Id Type
+/dev/mmcblk1p1      16384    81919    65536   32M  c W95 FAT32 (LBA)
+/dev/mmcblk1p2      81920   3555327 3473408  1.7G 83 Linux  （注意这行）
+
+Command (m for help): d
+                      2 (删除/dev/mmcblk1p2分区大小)
+                      n (添加新分区)
+                       p (primary)
+                      2 (第二个分区)
+                       81920
+                      default(32767999 到SD卡尾)
+                       w
+
+3. sudo reboot
+4. sudo resize2fs /dev/mmcblk1p2 等几分钟
+5. sudo df -h
+
+root@imx8qmmek:~# sudo df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root        15G  1.3G   13G   9% /   (现在只占9%)
+devtmpfs        2.6G  4.0K  2.6G   1% /dev
+tmpfs           2.9G     0  2.9G   0% /dev/shm
+tmpfs           2.9G  8.5M  2.9G   1% /run
+tmpfs           2.9G     0  2.9G   0% /sys/fs/cgroup
+tmpfs           2.9G  4.0K  2.9G   1% /tmp
+tmpfs           2.9G  100K  2.9G   1% /var/volatile
+/dev/mmcblk1p1   32M   21M   12M  63% /run/media/mmcblk1p1
+tmpfs           582M   88K  582M   1% /run/user/0
+
+root@imx8qmmek:~# sudo fdisk /dev/mmcblk1
+
+Welcome to fdisk (util-linux 2.28.1).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): p
+Disk /dev/mmcblk1: 15.6 GiB, 16777216000 bytes, 32768000 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x34e14c4b
+
+Device         Boot Start      End  Sectors  Size Id Type
+/dev/mmcblk1p1      16384    81919    65536   32M  c W95 FAT32 (LBA)
+/dev/mmcblk1p2      81920 32767999 32686080 15.6G 83 Linux
+
+扩容完成。
+----------------------------------------------------------------------------
+
+$ sudo scp -r SV3D-1.1 root@10.5.66.27:/home/root/
+
+ok!!!!
