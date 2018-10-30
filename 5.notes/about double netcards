@@ -1,0 +1,1 @@
+双网卡使用无线网卡上互联网，使用以太网卡连局域网，在/etc/network/interfaces里对以太网卡设置static ip无效，使用ifconfig临时设置也仅能工作一会，设置的ip马上就消失了，因为桌面版的ubuntu使用自己的NetworkManager来管理网络设备，要么kill掉下面所有的进程以使interfaces生效，要么使用右上角的NetworkManager配置ip

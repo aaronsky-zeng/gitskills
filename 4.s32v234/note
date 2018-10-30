@@ -1,0 +1,24 @@
+(1st)
+mkdir fsl-auto-yocto-bsp
+cd fsl-auto-yocto-bsp/
+repo init -u https://source.codeaurora.org/external/autobsps32/auto_yocto_bsp -b hotfix/bsp17.0.hf1 -m adas.xml
+repo sync
+
+source nxp-setup-alb.sh -m s32v234sbc
+bitbake virtual/kernel -c menuconfig
+bitbake fsl-image-auto
+bitbake fsl-image-vsdk
+
+(2nd)
+aaron@ubuntu:~/workstation_S32V/s32v234sbc/fsl-auto-yocto-bsp$ sudo /usr/sbin/visudo
+>>> /etc/sudoers: syntax error near line 22 <<<
+
+aaron@ubuntu:~/workstation_S32V/s32v234sbc/fsl-auto-yocto-bsp$ pkexec /usr/sbin/visudo 
+
+(3rd)
+https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-linux-gnu/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu.tar.xz
+
+ 
+(4th)
+Unable to acquire lock '/opt/fsl_local_mirror/s32v234_sdk/singletask.lock', directory is not writable
+sudo chown -R aaron /opt/fsl_local_mirror
