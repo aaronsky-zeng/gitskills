@@ -22,9 +22,9 @@ aaron@ubuntu:~$bitbake fsl-image-qt5-validation-imx
 
 	rc=$?
 	while [ "$rc" != 0 ]; do
-		cd ~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland
-		bitbake fsl-image-qt5-validation-imx
-		rc=$?
+	    cd ~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland
+	    bitbake fsl-image-qt5-validation-imx
+	    rc=$?
 	done
 	echo "finished!!!!!!!!!"
 
@@ -38,13 +38,13 @@ This command will go through the package environment and find out information ab
 
 Example:
 	U-boot source:
-		aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ DISTRO=fsl-imx-xwayland MACHINE=imx8qmmek source fsl-setup-release.sh -b build-xwayland
-		aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland$ bitbake -e u-boot | grep "^S="
-			S="/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/u-boot-imx/2017.03-r0/git"
+	    aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ DISTRO=fsl-imx-xwayland MACHINE=imx8qmmek source fsl-setup-release.sh -b build-xwayland
+	    aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland$ bitbake -e u-boot | grep "^S="
+		S="/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/u-boot-imx/2017.03-r0/git"
 
 	Linux source:
-		bitbake -e virtual/kernel | grep "^S="
-		S="/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git"
+	    bitbake -e virtual/kernel | grep "^S="
+	    S="/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git"
 -------------------------------------------------------------------------------------------------------------
 
 2.SDK setup
@@ -95,6 +95,7 @@ $ sudo dd if=<image name>.sdcard of=/dev/sd<partition> bs=1M conv=fsync
 
 4.上传SV3D
 先来说一下SV3D:The Surround View 3D (SV3D) project
+
 (To be continued...)
 
 
