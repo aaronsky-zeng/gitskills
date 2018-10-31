@@ -1,0 +1,101 @@
+
+
+i.MX 8QuadMax MEK Board
+1.yocto 开发环境搭建
+2.SDK setup
+3.烧写SD卡
+4.上传SV3D
+
+
+1.yocto 开发环境搭建
+aaron@ubuntu:~$cd /home/aaron/workstation_imx8QM_Yocto/yocto_bsp/
+aaron@ubuntu:~$repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-morty -m imx-4.9.51-8qm_beta2.xml
+aaron@ubuntu:~$repo sync
+aaron@ubuntu:~$DISTRO=fsl-imx-xwayland MACHINE=imx8qmmek source fsl-setup-release.sh -b build-xwayland
+aaron@ubuntu:~$bitbake fsl-image-qt5-validation-imx
+
+在这个过程中常常会由于网络的原因中断编译，下面这个脚本可以不浪费时间。
+	#!/bin/bash
+	DISTRO=fsl-imx-xwayland MACHINE=imx8qmmek source fsl-setup-release.sh -b build-xwayland
+	cd ~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland
+	bitbake fsl-image-qt5-validation-imx
+
+	rc=$?
+	while [ "$rc" != 0 ]; do
+		cd ~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland
+		bitbake fsl-image-qt5-validation-imx
+		rc=$?
+	done
+	echo "finished!!!!!!!!!"
+
+完成之后，所有的image会在：/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/deploy/images/imx8qmmek下
+---------------------------------------------------------------------------------------------------------
+如何找到uboot，linux等源码：
+How to locate U-Boot, Linux and other sources in the Yocto tree
+Locate the source for any packages, use the command bellow run from the build directory:
+	bitbake -e <package> | grep "^S="
+This command will go through the package environment and find out information about the location of the source.
+
+Example:
+	U-boot source:
+		aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ DISTRO=fsl-imx-xwayland MACHINE=imx8qmmek source fsl-setup-release.sh -b build-xwayland
+		aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland$ bitbake -e u-boot | grep "^S="
+			S="/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/u-boot-imx/2017.03-r0/git"
+
+	Linux source:
+		bitbake -e virtual/kernel | grep "^S="
+		S="/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git"
+-------------------------------------------------------------------------------------------------------------
+
+2.SDK setup
+
+aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ DISTRO=fsl-imx-xwayland MACHINE=imx8qmmek source fsl-setup-release.sh -b build-xwayland
+aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ bitbake meta-toolchain
+完成后，同样会有个目录：/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/deploy/sdk
+
+运行脚本文件 ./fsl-imx-xwayland-glibc-x86_64-meta-toolchain-aarch64-toolchain-4.9.51-mx8-beta.sh  
+安装完成后，会打印如下信息：
+    -----------------------------------------------------------------------------------------
+     SDK has been successfully set up and is ready to be used. 
+     Each time you wish to use the SDK in a new shell session, you need to source the environment setup script e.g. 
+     $ . /opt/fsl-imx-xwayland/4.9.51-mx8-beta/environment-setup-aarch64-poky-linux 
+    ------------------------------------------------------------------------------------------
+后面我们会分析environment-setup-aarch64-poky-linux
+
+3.烧写SD卡
+烧写full image to SD卡相对简单，进入目录~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/deploy/images/imx8qmmek
+
+$ bunzip <image_name>.sdcard.bz2
+$ sudo dd if=<image name>.sdcard of=/dev/sd<partition> bs=1M conv=fsync
+
+这里有个问题，无论你的卡多大，烧完的SD卡，只能访问2G之内的部分。超出的容量访问不了。
+这个时候需要SD卡扩容，细节参考https://github.com/aaronsky-zeng/gitskills/blob/master/5.notes/SD%E6%89%A9%E5%AE%B9.txt
+
+刚刚说烧写full image相对简单，那什么相对困难呢？
+分步烧写。
+
+分步烧写的意思是，分别将uboot，kernel，dtb，rootfs烧录至SD卡。
+这里参考s32v234文档的内容：
+	
+	cat /proc/partitions
+	
+	export DEVSD=/dev/sdb
+	sudo fdisk ${DEVSD}     /*对SD卡进行分区*/
+	sudo mkfs.vfat -n boot ${DEVSD}1
+	sudo mkfs.ext3 -L rootfs ${DEVSD}2
+
+	sudo dd if=<uboot> of=${DEVSD} bs=512 seek=1k conv=fsync
+	sudo cp <zImage> ${SD_MOUNT_POINT}/boot/
+	sudo cp <dtb_file> ${SD_MOUNT_POINT}/boot/<dtb_file>
+	sudo tar xf <rootfs> -C ${SD_MOUNT_POINT}/rootfs
+	sync
+相关内容参考：https://github.com/aaronsky-zeng/gitskills/blob/master/5.notes/SD%E5%8D%A1emmc.txt
+
+这样我们的SD卡就可以使用了。将sd卡插入i.MX 8QuadMax MEK Board
+
+4.上传SV3D
+先来说一下SV3D:The Surround View 3D (SV3D) project
+(To be continued...)
+
+
+
