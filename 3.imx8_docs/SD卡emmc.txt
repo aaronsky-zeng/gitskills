@@ -1,0 +1,94 @@
+1.pc插入SD卡，
+$cat /proc/partitions
+major minor #blocks name
+8 0 85647168 sda
+8 1 82628608 sda1
+8 2 1 sda2
+8 5 3015680 sda5
+11 0 58258 sr0
+8 16 7707648 sdb
+8 17 7703552 sdb1
+这里看到的是所有的分区情况，sdb是SD卡的
+
+2.export DEVSD=/dev/sdb
+
+3.NXP提供prebuilt的image，包含*.sdcard安装包。
+.sdcard后缀的安装包，包含uboot，kernel，和rootfs所有的东西。
+将这个包直接烧入SD卡
+
+sudo dd if=<image name>.sdcard of=${DEVSD} bs=1M && sync
+
+这里if表示input file，of表示output file
+
+4.完成后，可以直接从SD卡启动
+
+---------------------以上是在Ubuntu下烧写完整的安装包到SD卡---------------------
+
+----------------------分别烧写uboot，kernel，rootfs---------------------
+准备一张SD卡，插入pc
+1.sudo fdisk ${DEVSD}
+
+对整个SD进行分区，将SD卡分为两个区，第一个分区255M,FAT32格式；剩下的大小为第二个分区，格式83(linux):
+
+d [repeat this until no partition is reported by the 'p' command ]
+n [create a new partition]
+p [create a primary partition]
+1 [the first partition]
+<enter>[using the default value will create a partition that starts at offset 2048]
++255M [size of the actual partition = 255 MB]
+
+n [create a new partition]
+p [create a primary partition]
+2 [the second partition]
+<enter>[using the default value will create a partition that starts at offset 67584]
+<enter>[using the default value will create a partition that uses the remaining space on
+the card]
+t [set partition type]
+1 [partition #1]
+c [FAT32]
+
+t [set partition type]
+2 [partition #2]
+83 [Linux]
+w [ this writes the partition table to the medium and fdisk exits]
+
+2.分别格式化两个分区，并mount到/media/****/boot和/meida/****/rootfs
+sudo mkfs.vfat -n boot ${DEVSD}1
+sudo mkfs.ext3 -L rootfs ${DEVSD}2
+
+3.分别烧录uboot，kernel，rootfs
+
+export SD_MOUNT_POINT=/media/****
+cd ............./images/
+sudo dd if=<u-boot_image> of=${DEVSD} bs=512 seek=8 conv=fsync
+sudo cp Image ${SD_MOUNT_POINT}/boot/
+sudo cp <dtb_file> ${SD_MOUNT_POINT}/boot/<dtb_file>
+sudo tar xf <rootfs> -C ${SD_MOUNT_POINT}/rootfs
+sync
+
+---------------------------------emmc---------------------------------
+1.将uboot放到/media/****/boot中，
+cd /path/to/uboot
+sudo cp <u-boot> /media/****/boot
+
+2.启动，停止在uboot
+
+3.将uboot从sd卡上copy到ram中
+fatload mmc 0:1 0xC0000000 <u-boot>
+
+4.切换启动，将从SD卡启动转成emmc启动
+=> mmc rescan
+=> mmcinfo
+
+5.写uboot到emmc中
+mmc write 0xC0000000 0x8 0x220
+将先前已经loading到0xC0000000的uboot，copy到emmc中，
+每个emmc sector 是512 bytes（0x200）
+所有emmc address 0x1000/0x200 = 0x8
+如果uboot大小是0x44000，那么写到emmc的大小是0x44000/0x200=0x220 个sectors
+就是说：从0x8地址处，写入0x220个扇区
+
+6.重启。这样emmc中就有uboot了。
+
+----------------------------从SD卡写入emmc，其他的部分kernel，rootfs等仿照上面方法试试
+关键的就是地址和大小-----------------------------
