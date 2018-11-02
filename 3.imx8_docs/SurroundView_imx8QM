@@ -5,7 +5,7 @@ i.MX 8QuadMax MEK Board
 2.SDK setup
 3.烧写SD卡
 4.上传SV3D
-
+5.SV3D编译
 
 1.yocto 开发环境搭建
 aaron@ubuntu:~$cd /home/aaron/workstation_imx8QM_Yocto/yocto_bsp/
@@ -53,12 +53,12 @@ aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ DISTRO=fsl-imx-xwayland MACHI
 aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp$ bitbake meta-toolchain
 完成后，同样会有个目录：/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/deploy/sdk
 
-运行脚本文件 ./fsl-imx-xwayland-glibc-x86_64-meta-toolchain-aarch64-toolchain-4.9.51-mx8-beta.sh  
+运行脚本文件 ./fsl-imx-xwayland-glibc-x86_64-meta-toolchain-aarch64-toolchain-4.9.51-mx8-beta.sh
 安装完成后，会打印如下信息：
     -----------------------------------------------------------------------------------------
-     SDK has been successfully set up and is ready to be used. 
-     Each time you wish to use the SDK in a new shell session, you need to source the environment setup script e.g. 
-     $ . /opt/fsl-imx-xwayland/4.9.51-mx8-beta/environment-setup-aarch64-poky-linux 
+     SDK has been successfully set up and is ready to be used.
+     Each time you wish to use the SDK in a new shell session, you need to source the environment setup script e.g.
+     $ . /opt/fsl-imx-xwayland/4.9.51-mx8-beta/environment-setup-aarch64-poky-linux
     ------------------------------------------------------------------------------------------
 后面我们会分析environment-setup-aarch64-poky-linux
 
@@ -74,11 +74,11 @@ $ sudo dd if=<image name>.sdcard of=/dev/sd<partition> bs=1M conv=fsync
 刚刚说烧写full image相对简单，那什么相对困难呢？
 分步烧写。
 
-分步烧写的意思是，分别将uboot，kernel，dtb，rootfs烧录至SD卡。
+分步烧写的意思是，分别将uboot，kernel，dtb，rootfs烧录至SD卡.
 这里参考s32v234文档的内容：
-	
+
 	cat /proc/partitions
-	
+
 	export DEVSD=/dev/sdb
 	sudo fdisk ${DEVSD}     /*对SD卡进行分区*/
 	sudo mkfs.vfat -n boot ${DEVSD}1
@@ -94,9 +94,121 @@ $ sudo dd if=<image name>.sdcard of=/dev/sd<partition> bs=1M conv=fsync
 这样我们的SD卡就可以使用了。将sd卡插入i.MX 8QuadMax MEK Board
 
 4.上传SV3D
+板子启动以后，如果可以远程访问板子：
+    ssh root@10.5.66.27
+那么就可以将SV3D环视project，导入板子：
+    $ sudo scp -r SV3D-1.1 root@10.5.66.27:/home/root/
+
 先来说一下SV3D:The Surround View 3D (SV3D) project
+整个project可以分成两部分：
+(1)calibration
+   1。Lens camera calibration
+   2。system calibration
+(2)rendering渲染
 
-(To be continued...)
+目录结构：------------------------------------
+ App
+    Build(编译完成后生产)
+    |   auto_calib_1.1
+    |   SV3D-1.1
+    Content
+    Licenses
+    README.md
+    Source
+    |   Calibration
+    |   Capturing
+    |   Common
+    |   Makefile.fb
+    |   Makefile.wl
+    |   Makefile.x11
+    |   Render
+ Doc
+    SVARM.pdf
+    SVAUG.pdf
+ Tools
+    CalibPatterns
+    CamCapture
+    |   capturing(编译完成后生产)
+    CamStand
+    OCamCalib
+ EULA.txt
+ SW-Content-Register.txt
+ ----------------------------------------------
+ 关于SV3D的硬件连接，软件版本要求等详细资料，参考Doc目录下的SVARM.pdf和SVAUG.pdf文档
+ 
+ 5.SV3D编译
+ 在App目录下的README.md中记录了如何编译和运行SV3D project
+它提供了两种方案：
+（一）在imx8qmmek板子上直接选择对应的inputs/backend,使用下表的指令运行：
+Steps for compiling and running the SV3D project on i.MX target board:
+   1. Go to the Source folder. 进入App/Source目录
+   2. Build the project using command make:
+      - i.MX6QP:                \backend         |                x11                     |                fb
+                        inputs   \               |                                        |
+                 ---------------------------------------------------------------------------------------------------------------
+                                 images          |  make -f Makefile.x11 INPUT=image      |   make -f Makefile.fb INPUT=image
+                 ---------------------------------------------------------------------------------------------------------------
+                                 videos          |  make -f Makefile.x11 INPUT=video      |   make -f Makefile.fb INPUT=video
+                 ---------------------------------------------------------------------------------------------------------------
+                                 raw             |  make -f Makefile.x11 INPUT=raw        |   make -f Makefile.fb INPUT=raw
+                 ---------------------------------------------------------------------------------------------------------------
+                                 cameras         |  make -f Makefile.x11 DEVICE=IMX6QP    |   make -f Makefile.fb DEVICE=IMX6QP
+                 ---------------------------------------------------------------------------------------------------------------
 
 
+      - i.MX8QM:                \backend         |               XWayland                                   fb
+                        inputs   \               |
+                 ---------------------------------------------------------------------------------------------------------------
+                                 images          |  make -f Makefile.wl INPUT=image       |   make -f Makefile.fb INPUT=image
+                 ---------------------------------------------------------------------------------------------------------------
+                                 videos          |  make -f Makefile.wl INPUT=video       |   make -f Makefile.fb INPUT=video
+                 ---------------------------------------------------------------------------------------------------------------
+                                 raw             |  make -f Makefile.wl INPUT=raw         |   make -f Makefile.fb INPUT=raw
+                 ---------------------------------------------------------------------------------------------------------------
+                                 cameras         |  make -f Makefile.wl DEVICE=IMX8QM     |   make -f Makefile.fb DEVICE=IMX8QM
+                 ---------------------------------------------------------------------------------------------------------------
 
+        NOTE: 'DEVICE' macro is defined for application with the camera inputs only.
+        对应我的imx8qm的板子，使用：make -f Makefile.wl DEVICE=IMX8QM
+
+   3. Go to the /Tools/CamCapture folder 编译完成后会在/Tools/CamCapture下生成capturing
+   4. Execute the 'capturing' binary.
+   5. Go to the App/Build folder. 同时会在App目录下生成Build目录，包含auto_calib-1.1和SV3D-1.1
+   6. Execute the 'auto_calib-1.1' binary.
+   7. Execute the 'SV3D-1.1' binary.
+
+（二）另外一种方法是在PC端，使用交叉工具链编译，完成后将上面生成的3个可执行文件导入板子
+Steps for compiling and running the SV3D project with cross compiler:
+   1. Source the tools environment setup script environment-setup-cortexa9hf-vfp-neon-poky-linux-gnueabi.
+      这步其实是全文的第二章节，“2.SDK setup”
+	  运行$ . /opt/fsl-imx-xwayland/4.9.51-mx8-beta/environment-setup-aarch64-poky-linux
+	  然后进入App/Source，执行：make -f Makefile.wl DEVICE=IMX8QM(下面的2,3)
+
+   2. Go to the Source folder.
+   3. Build the project using command make. SV3D-1.1 and auto_calib-1.1 binaries will be created in /App/Build folder,
+   while capturing application will be created in /Tools/CamCapture folder.
+		3的执行过程，会出现很多的编译，链接的问题.
+		调试过程太麻烦，这里只写结论：
+		(1)用/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/sysroots/imx8qmmek/lib替代
+		     /opt/fsl-imx-xwayland/4.9.51-mx8-beta/sysroots/aarch64-poky-linux/lib
+		(2)用/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/sysroots/imx8qmmek/usr/lib替代
+		     /opt/fsl-imx-xwayland/4.9.51-mx8-beta/sysroots/aarch64-poky-linux/usr/lib
+		(3)用/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/sysroots/imx8qmmek/usr/include替代
+		     /opt/fsl-imx-xwayland/4.9.51-mx8-beta/sysroots/aarch64-poky-linux/usr/include
+
+   4. Copy Build and Content folders to i.mx board.
+   5. Set permissions of binaries using chmod command.
+   6. Execute the capturing binary and perform an additional lens camera calibration using OCamCalib Matlab toolbox.
+   7. Execute the auto_calib-1.1 binary.
+   8. Execute the SV3D-1.1 binary.
+
+For compiling and running the SV3D project were used these Yocto images:
+   1. i.mx6qp saber auto board with Yocto Linux BSP L4.1.15 with OpenCV 3.1 and OpenGL ES 3.0 supporting.
+      (git://git.freescale.com/imx/fsl-arm-yocto-bsp.git)
+   2. i.mx8qm board with Yocto Linux BSP L4.9.51-8QM-beta2 with OpenCV 3.4 and OpenGL ES 3.0 supporting.
+      (http://yb2.am.freescale.net/internal-only/Linux_IMX_MX8_BETA/L4.9.51-8QM-beta2-rc2(119))
+
+以上两种方案，第一种方案，rootfs里缺少cc命令，无法进行下去。选用的第二套方案。
+
+6.运行
+使用hdmi，连接上imx8qmmek+max9286+ov10635*4
