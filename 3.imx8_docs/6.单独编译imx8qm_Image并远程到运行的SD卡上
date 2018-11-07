@@ -1,0 +1,54 @@
+
+将编译好的image远程copy到正在运行的系统SD上
+ 
+IN A TERMINAL:
+  ssh root@10.5.66.27
+  cd ~
+  mkdir mountdir
+  mount /dev/mmcblk1p1 mountdir/       #mount first partition of SD card to "mountdir"
+  cd mountdir/
+  rm Image
+
+IN B TERMINAL:
+  meld drivers/media/platform/imx8/max9286.c ~/Desktop/kernel-source/drivers/media/platform/imx8/max9286.c
+ 
+  source /opt/fsl-imx-xwayland/4.9.51-mx8-beta/environment-setup-aarch64-poky-linux 
+  ARCH=arm64
+  make defconfig
+  make
+
+  ------------------------ERROR----------------------------
+	aaron@ubuntu:~/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git$ make
+	scripts/kconfig/conf  --silentoldconfig Kconfig
+  	CHK     include/config/kernel.release
+  	CHK     include/generated/uapi/linux/version.h
+  	CHK     include/generated/utsrelease.h
+  	CHK     include/generated/bounds.h
+  	CHK     include/generated/timeconst.h
+  	CHK     include/generated/asm-offsets.h
+  	CALL    scripts/checksyscalls.sh
+  	CHK     include/generated/compile.h
+  	LD      init/mounts.o
+	aarch64-poky-linux-ld: unrecognized option '-Wl,-O1'
+	aarch64-poky-linux-ld: use the --help option for usage information
+	make[1]: *** [init/mounts.o] Error 1
+	make: *** [init] Error 2
+
+	解决办法：注销环境变量LDFLAGS,命令是unset LDFLAGS。
+  -------------------------------------------------------------
+   unset LDFLAGS
+   env    #check if remove LDFLAGS
+   make
+
+The Image created at "/home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git/arch/arm64/boot"
+
+cd /home/aaron/workstation_imx8QM_Yocto/yocto_bsp/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git/arch/arm64/boot
+sudo scp Image root@10.5.66.27:/home/root/mountdir/
+
+BACK TO A TERMINAL:
+  cd ..
+  umount mountdir
+  reboot
+ 重启，重新加载新编译的Image。
+ 
+ 
