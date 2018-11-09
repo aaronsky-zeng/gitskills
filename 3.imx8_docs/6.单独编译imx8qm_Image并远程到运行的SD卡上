@@ -5,7 +5,13 @@ IN A TERMINAL:
   ssh root@10.5.66.27
   cd ~
   mkdir mountdir
-  mount /dev/mmcblk1p1 mountdir/       #mount first partition of SD card to "mountdir"
+
+  mount /dev/mmcblk1p1 mountdir/       
+	#mount first partition of SD card to "mountdir"
+	#here,"mmc" multimedia card means SD card
+	#     "blk1" means block,the second block. "blk0" the first block.
+	#     "p1" 2nd partition.
+
   cd mountdir/
   rm Image
 
