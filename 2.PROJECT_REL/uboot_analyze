@@ -7,9 +7,9 @@ mx6solo_sabresd_config			\
 mx6solo_sabresd_mfg_config		\
 mx6dl_sabresd_config			\
 mx6dl_sabresd_mfg_config		\
-mx6dl_sabresd_android_config			\
+mx6dl_sabresd_android_config		\
 mx6q_sabresd_config			\
-mx6q_sabresd_android_config             \
+mx6q_sabresd_android_config		\
 mx6q_sabresd_mfg_config			\
 mx6q_sabresd_iram_config	: unconfig
 	@[ -z "$(findstring iram_,$@)" ] || \
@@ -24,19 +24,19 @@ mx6q_sabresd_iram_config	: unconfig
 ——————————————————————————————————————————————————————————————————————————————————————————
 过程：
 -------------------------------------
-MKCONFIG	:= $(SRCTREE)/mkconfig
+MKCONFIG  := $(SRCTREE)/mkconfig
 
-OBJTREE		:= $(if $(BUILD_DIR),$(BUILD_DIR),$(CURDIR))     #如果$(BUILD_DIR)存在，那么OBJTREE := $(BUILD_DIR);否则 :=$(CURDIR)
-SRCTREE		:= $(CURDIR)
-TOPDIR		:= $(SRCTREE)
-LNDIR		:= $(OBJTREE)
+OBJTREE  := $(if $(BUILD_DIR),$(BUILD_DIR),$(CURDIR))  #如果$(BUILD_DIR)存在，那么OBJTREE := $(BUILD_DIR);否则 :=$(CURDIR)
+SRCTREE	 := $(CURDIR)
+TOPDIR	 := $(SRCTREE)
+LNDIR	 := $(OBJTREE)
 export	TOPDIR SRCTREE OBJTREE
 
 -----------就是顶层的mkconfig------------
 分析一下顶层的mkconfig
 
-while [ $# -gt 0 ] ; do									# 传入的参数是否大于0。这里“$#”表示传入参数个数。
-	case "$1" in										# “$1”----表示第一个参数
+while [ $# -gt 0 ] ; do				# 传入的参数是否大于0。这里“$#”表示传入参数个数。
+	case "$1" in				# “$1”----表示第一个参数
 	--) shift ; break ;;
 	-a) shift ; APPEND=yes ;;
 	-n) shift ; BOARD_NAME="${1%%_config}" ; shift ;;
@@ -44,16 +44,16 @@ while [ $# -gt 0 ] ; do									# 传入的参数是否大于0。这里“$#”�
 	esac
 done
 
-[ "${BOARD_NAME}" ] || BOARD_NAME="$1"					#如果BOARD_NAME为空，将$1值给BOARD_NAME。
-														#   “||” 或操作。
-														#   想一下，如果“||”的前面等于1了，无论他后面是什么值，整个函数都是1.
-														#   只有他的前面为0，后面的部分才有意义。
+[ "${BOARD_NAME}" ] || BOARD_NAME="$1"		#如果BOARD_NAME为空，将$1值给BOARD_NAME。
+						#   “||” 或操作。
+						#   想一下，如果“||”的前面等于1了，无论他后面是什么值，整个函数都是1.
+						#   只有他的前面为0，后面的部分才有意义。
 															
-[ $# -lt 4 ] && exit 1									# 参数个数<4,退出
-[ $# -gt 6 ] && exit 1									# 参数个数>6,退出
+[ $# -lt 4 ] && exit 1				# 参数个数<4,退出
+[ $# -gt 6 ] && exit 1				# 参数个数>6,退出
 
 /*然后通过判断一些参数来删除，创建文件和文件夹等等*/
-if [ "$SRCTREE" != "$OBJTREE" ] ; then					#这里$SRCTREE 是等于 $OBJTREE的。
+if [ "$SRCTREE" != "$OBJTREE" ] ; then		#这里$SRCTREE 是等于 $OBJTREE的。
 	...
 else
 	cd ./include
@@ -61,8 +61,8 @@ else
 	ln -s asm-$2 asm
 fi
 
-echo "ARCH   = $2" >  config.mk							# ">" 表示创建config.mk文件
-echo "CPU    = $3" >> config.mk							# “>>”追加到config.mk的文件尾
+echo "ARCH   = $2" >  config.mk			# ">" 表示创建config.mk文件
+echo "CPU    = $3" >> config.mk			# “>>”追加到config.mk的文件尾
 echo "BOARD  = $4" >> config.mk
 [ "$5" ] && [ "$5" != "NULL" ] && echo "VENDOR = $5" >> config.mk
 [ "$6" ] && [ "$6" != "NULL" ] && echo "SOC    = $6" >> config.mk
@@ -180,9 +180,9 @@ $(obj)u-boot:   depend $(SUBDIRS) $(OBJS) $(LIBBOARD) $(LIBS) $(LDSCRIPT) $(obj)
 #       :%!tools/reformat.py -i -d '-' -s 8
 #
 # 	（5）格式：
-#	Status, Arch, CPU:SPLCPU, SoC,    Vendor,         Board name,   Target,           Options, Maintainers
+#	Status, Arch, CPU:SPLCPU, SoC,    Vendor,         Board name,     Target,      Options, Maintainers
 ###########################################################################################################
-    Active  arm      armv7     mx6    freescale       mx6sabresd      mx6qsabresd     
+        Active  arm      armv7     mx6    freescale       mx6sabresd      mx6qsabresd     
 	
 	mx6sabresd:IMX_CONFIG=board/freescale/imx/ddr/mx6q_4x_mt41j128.cfg,MX6Q,
 	DEFAULT_FDT_FILE="imx6q-sabresd.dtb",DDR_MB=1024,SYS_USE_SPINOR       
@@ -206,7 +206,7 @@ uboot porting工作的基本工作：
 
 3、在“boards.cfg”中增加自己开发板选项。
 进入到uboot_3.10.53目录下，然后打开“boards.cfg”文件，在“mx6sabresd.....”那一行的下一行增加自己开发板的一行，
-    Active  arm      armv7     mx6    freescale       mx6xxxx      mx6xxxx    
+        Active  arm      armv7     mx6    freescale       mx6xxxx      mx6xxxx    
 	
 	mx6xxxx:IMX_CONFIG=board/freescale/imx/ddr/mx6q_4x_mt41j128.cfg,MX6Q,
 	DEFAULT_FDT_FILE="imx6q-sabresd.dtb",DDR_MB=1024,SYS_USE_SPINOR       
@@ -264,7 +264,7 @@ reset:
 
 #ifndef CONFIG_SKIP_LOWLEVEL_INIT	    @没有定义CONFIG_SKIP_LOWLEVEL_INIT
         bl      cpu_init_cp15
-        bl      cpu_init_crit			@
+        bl      cpu_init_crit
 #endif
 
 --------------------------------------------------------
@@ -282,15 +282,15 @@ ENDPROC(cpu_init_crit)
         bl      _main
 
 bl      _main					@跳到_main函数处。
-								@start.S里调用的函数格式都是：
-								@	ENTRY(abcd)
-								@	...
-								@	ENDPROC(abcd)
-								@所以全局搜索：grep -rns "ENTRY(_main)" *
-								@
-								@crt0_64.S:59:ENTRY(_main)            for arm
-								@crt0.S:58:ENTRY(_main)               for aarch64
-								@都在：arch/arm/lib下
+						@start.S里调用的函数格式都是：
+						@	ENTRY(abcd)
+						@	...
+						@	ENDPROC(abcd)
+						@所以全局搜索：grep -rns "ENTRY(_main)" *
+						@
+						@crt0_64.S:59:ENTRY(_main)            for arm
+						@crt0.S:58:ENTRY(_main)               for aarch64
+						@都在：arch/arm/lib下
 打开crt0.S看一眼，为C语言的运行，设置栈，和一些硬件的初始化。
 具体的函数不分析，porting的时候要逐条体会。
 
@@ -344,7 +344,7 @@ void main_loop(void)
 	}
 }
 看，main_loop关键的两件事：1.倒计时，是否有空格按下。没有空格按下，启动内核。
-							2.有空格按下，等待输入，解析输入的cmd，运行输入的cmd。
+			   2.有空格按下，等待输入，解析输入的cmd，运行输入的cmd。
 以上就是我们进uboot所看到的。
 
 ------------------------------------------------------------------------------------
