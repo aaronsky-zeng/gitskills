@@ -1,0 +1,403 @@
+uboot分析：以uboot-2009.08和uboot_3.10.53(2014)为例：
+
+
+（1）以下为分析make *_config内容：（以uboot—2009.08为例：）
+
+mx6solo_sabresd_config			\
+mx6solo_sabresd_mfg_config		\
+mx6dl_sabresd_config			\
+mx6dl_sabresd_mfg_config		\
+mx6dl_sabresd_android_config			\
+mx6q_sabresd_config			\
+mx6q_sabresd_android_config             \
+mx6q_sabresd_mfg_config			\
+mx6q_sabresd_iram_config	: unconfig
+	@[ -z "$(findstring iram_,$@)" ] || \
+		{ echo "TEXT_BASE = 0x00907000" >$(obj)board/freescale/mx6q_sabresd/config.tmp ; \
+		  echo "... with iram configuration" ; \
+		}
+	@$(MKCONFIG) $(@:_config=) arm arm_cortexa8 mx6q_sabresd freescale mx6
+-----------------------------实线下面是分析过程----------------------------
+上面这条命令就转换为下面这个脚本：
+	mkconfig     mx6q_sabresd  arm arm_cortexa8 mx6q_sabresd freescale  mx6
+	  $0              $1       $2      $3             $4       $5       $6
+——————————————————————————————————————————————————————————————————————————————————————————
+过程：
+-------------------------------------
+MKCONFIG	:= $(SRCTREE)/mkconfig
+
+OBJTREE		:= $(if $(BUILD_DIR),$(BUILD_DIR),$(CURDIR))     #如果$(BUILD_DIR)存在，那么OBJTREE := $(BUILD_DIR);否则 :=$(CURDIR)
+SRCTREE		:= $(CURDIR)
+TOPDIR		:= $(SRCTREE)
+LNDIR		:= $(OBJTREE)
+export	TOPDIR SRCTREE OBJTREE
+
+-----------就是顶层的mkconfig------------
+分析一下顶层的mkconfig
+
+while [ $# -gt 0 ] ; do									# 传入的参数是否大于0。这里“$#”表示传入参数个数。
+	case "$1" in										# “$1”----表示第一个参数
+	--) shift ; break ;;
+	-a) shift ; APPEND=yes ;;
+	-n) shift ; BOARD_NAME="${1%%_config}" ; shift ;;
+	*)  break ;;
+	esac
+done
+
+[ "${BOARD_NAME}" ] || BOARD_NAME="$1"					#如果BOARD_NAME为空，将$1值给BOARD_NAME。
+														#   “||” 或操作。
+														#   想一下，如果“||”的前面等于1了，无论他后面是什么值，整个函数都是1.
+														#   只有他的前面为0，后面的部分才有意义。
+															
+[ $# -lt 4 ] && exit 1									# 参数个数<4,退出
+[ $# -gt 6 ] && exit 1									# 参数个数>6,退出
+
+/*然后通过判断一些参数来删除，创建文件和文件夹等等*/
+if [ "$SRCTREE" != "$OBJTREE" ] ; then					#这里$SRCTREE 是等于 $OBJTREE的。
+	...
+else
+	cd ./include
+	rm -f asm
+	ln -s asm-$2 asm
+fi
+
+echo "ARCH   = $2" >  config.mk							# ">" 表示创建config.mk文件
+echo "CPU    = $3" >> config.mk							# “>>”追加到config.mk的文件尾
+echo "BOARD  = $4" >> config.mk
+[ "$5" ] && [ "$5" != "NULL" ] && echo "VENDOR = $5" >> config.mk
+[ "$6" ] && [ "$6" != "NULL" ] && echo "SOC    = $6" >> config.mk
+
+if [ "$APPEND" = "yes" ]	# Append to existing config file
+then
+	echo >> config.h
+else
+	> config.h		# Create new config file
+fi
+echo "/* Automatically generated - do not edit */" >>config.h
+echo "#include <configs/$1.h>" >>config.h
+echo "#include <asm/config.h>" >>config.h
+----------
+结论：
+  这里会在某些路径下面创建几个关键的文件。
+  
+  运行make mx6q_sabresd_config之后：
+  
+  include/asm-arm/
+	proc -> proc-armv
+	arch -> arch-mx6
+  
+  include/
+	asm -> asm-arm/
+	
+  include/
+	config.h
+	config.mk
+	-------------------------------------
+	config.mk内容：
+		ARCH   = arm
+		CPU    = arm_cortexa8
+		BOARD  = mx6q_sabresd
+		VENDOR = freescale
+		SOC    = mx6
+	config.h内容：
+		#include <configs/mx6q_sabresd.h>
+		#include <asm/config.h>
+---------------------以上分析顶层config.mk--------------------
+
+然后make，走的是：
+ALL += $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map $(U_BOOT_NAND) $(U_BOOT_ONENAND)
+
+all:            $(ALL)
+
+$(obj)u-boot.srec:      $(obj)u-boot
+                $(OBJCOPY) -O srec $< $@
+
+$(obj)u-boot.bin:       $(obj)u-boot
+                $(OBJCOPY) ${OBJCFLAGS} -O binary $< $@
+				
+$(obj)System.map:       $(obj)u-boot
+                @$(call SYSTEM_MAP,$<) > $(obj)System.map
+				GEN_UBOOT = \
+                UNDEF_SYM=`$(OBJDUMP) -x $(LIBBOARD) $(LIBS) | \
+                sed  -n -e 's/.*\($(SYM_PREFIX)__u_boot_cmd_.*\)/-u\1/p'|sort|uniq`;\
+                cd $(LNDIR) && $(LD) $(LDFLAGS) $$UNDEF_SYM $(__OBJS) \
+                        --start-group $(__LIBS) --end-group $(PLATFORM_LIBS) \
+                        -Map u-boot.map -o u-boot
+$(obj)u-boot:   depend $(SUBDIRS) $(OBJS) $(LIBBOARD) $(LIBS) $(LDSCRIPT) $(obj)u-boot.lds
+                $(GEN_UBOOT)
+
+这部分分析很麻烦，可以看看make之后出现的log内容。
+可以看到文件的链接，哪个是第一个文件: **/cpu/../start.S。通常在u-boot.lds
+--------------------------------------------------------------------------------------
+
+
+
+（2）
+--------------------------------------------------------------
+在u-boot-2011之后出现了boards.cfg文件
+分析如下：
+# List of boards
+#
+# Syntax:
+#       white-space separated list of entries;
+#       each entry has the fields documented below.
+#
+#       （1）Unused fields can be specified as "-", or omitted if they
+#       are the last field on the line.
+#  如果该field没填，可以用“-”代替。最后的field没填，可以不填。
+#       Lines starting with '#' are comments.
+#       Blank lines are ignored.
+#
+#       （2）The CPU field takes the form:
+#               cpu[:spl_cpu]
+#       If spl_cpu is specified the make variable CPU will be set to this
+#       during the SPL build.
+#
+#       （3）The options field takes the form:
+#               <board config name>[:comma separated config options]
+#       Each config option has the form (value defaults to "1"):
+#               option[=value]
+		例子：
+#       So if you have:
+#               FOO:HAS_BAR,BAZ=64
+#       The file include/configs/FOO.h will be used, and these defines created:
+#               #define CONFIG_HAS_BAR  1
+#               #define CONFIG_BAZ      64
+		(这个地方在后面的版本里改掉了，路径改为：include/autoconf.mk，而不是上面的include/configs/<board_name>.h)
+#
+#       （4）The maintainers field lists the e-mail addresses of the board's
+#       maintainers, separated by colons. NOTE: there are spaces in this field!
+#       For any board without permanent maintainer, please contact
+#           Wolfgang Denk <wd@denx.de>
+#       And Cc: the <u-boot@lists.denx.de> mailing list.
+
+# The list should be ordered according to the C locale.
+#
+# To keep the list formatted and sorted, script tools/reformat.py is available.
+# It can be used from a shell:
+#       tools/reformat.py -i -d '-' -s 8 <boards.cfg >boards0.cfg && mv boards0.cfg boards.cfg
+# It can directly be invoked from vim:
+#       :%!tools/reformat.py -i -d '-' -s 8
+#
+# 	（5）格式：
+#	Status, Arch, CPU:SPLCPU, SoC,    Vendor,         Board name,   Target,           Options, Maintainers
+###########################################################################################################
+    Active  arm      armv7     mx6    freescale       mx6sabresd      mx6qsabresd     
+	
+	mx6sabresd:IMX_CONFIG=board/freescale/imx/ddr/mx6q_4x_mt41j128.cfg,MX6Q,
+	DEFAULT_FDT_FILE="imx6q-sabresd.dtb",DDR_MB=1024,SYS_USE_SPINOR       
+	
+	Fabio Estevam <fabio.estevam@freescale.com>
+
+编译脚本：
+#!/bin/bash
+export ARCH=arm
+export CROSS_COMPILE=~/workstation_imx6/3.10.53-1.1.0/build-x11/tmp/sysroots/x86_64-linux/usr/bin/cortexa9hf-vfp-neon-poky-linux-gnueabi/arm-poky-linux-gnueabi-
+make distclean
+make mx6qsabresd_config
+make
+
+-------------------------------------------------------------------------------------------------------------
+uboot porting工作的基本工作：
+
+1、下载uboot_3.10.53，地址：ftp://ftp.denx.de/pub/u-boot/
+
+2、解压u-boot到工作路径。tar -xvjf uboot_3.10.53.tar.bz2 -C /home/aaron/workspace/
+
+3、在“boards.cfg”中增加自己开发板选项。
+进入到uboot_3.10.53目录下，然后打开“boards.cfg”文件，在“mx6sabresd.....”那一行的下一行增加自己开发板的一行，
+    Active  arm      armv7     mx6    freescale       mx6xxxx      mx6xxxx    
+	
+	mx6xxxx:IMX_CONFIG=board/freescale/imx/ddr/mx6q_4x_mt41j128.cfg,MX6Q,
+	DEFAULT_FDT_FILE="imx6q-sabresd.dtb",DDR_MB=1024,SYS_USE_SPINOR       
+	
+	aaron zeng <aaron.zeng@wtmec.com>
+保存退出。
+
+4、增加自己开发板的文件夹。进入到“/uboot_3.10.53/board/fresscale”目录下，增加自己开发板的文件夹，起名字为“mx6xxxx”，
+将“mx6sabresd”文件下的所有文件拷贝到“mx6xxxx”文件夹下，进入到mx6xxxx文件夹下，将“mx6sabresd.c”改名为“mx6xxxx.c”，
+打开Makefile文件，将“COBJS  := mx6sabresd.o”改为“obj-y  := mx6xxxx.o”。
+
+5、增加自己开发板头文件。进入到“/uboot_3.10.53/include/configs”目录下，拷贝“mx6sabresd.h”并命名为“mx6xxxx.h”。
+
+6. 编写自己的编译脚本
+
+7.make distclean 会出现如下信息，这些文件都是编译生成的：
+  CLEAN   examples/standalone
+  CLEAN   tools
+  CLEAN   u-boot.lds include/bmp_logo.h include/bmp_logo_data.h include/autoconf.mk include/autoconf.mk.dep
+  CLEAN   u-boot u-boot.bin u-boot.imx u-boot.map u-boot.srec System.map
+  CLEAN   scripts/basic
+  CLEAN   include/config include/generated
+  CLEAN   include/config.h include/config.mk
+  
+  还有其他链接：arch/arm/include/asm下：
+  arch -> arch-mx6/
+  proc -> proc-armv/
+
+8. 在boards.cfg添加的信息，在make mx6xxxx_config的时候打印出来：
+   Configuring for mx6xxxx - Board: mx6xxxx, Options: IMX_CONFIG=board/freescale/mx6sabresd/mx6dl_4x_mt41j128.cfg,
+   MX6DL,DEFAULT_FDT_FILE="imx6dl-sabresd.dtb",DDR_MB=1024,SYS_USE_SPINOR
+--------------------------------------------------------------------------------------------------------------------------
+
+（3）一步一步分析start.S，看看是怎么走的
+vim cd arch/arm/cpu/armv7/start.S
+
+.globl _start
+_start: b       reset
+.
+.
+.
+reset:
+        bl      save_boot_params
+        /*
+         * disable interrupts (FIQ and IRQ), also set the cpu to SVC32 mode,
+         * except if in HYP mode already
+         */
+        mrs     r0, cpsr
+        and     r1, r0, #0x1f           @ mask mode bits
+        teq     r1, #0x1a               @ test for HYP mode
+        bicne   r0, r0, #0x1f           @ clear all mode bits
+        orrne   r0, r0, #0x13           @ set SVC mode
+        orr     r0, r0, #0xc0           @ disable FIQ and IRQ
+        msr     cpsr,r0
+
+#ifndef CONFIG_SKIP_LOWLEVEL_INIT	    @没有定义CONFIG_SKIP_LOWLEVEL_INIT
+        bl      cpu_init_cp15
+        bl      cpu_init_crit			@
+#endif
+
+--------------------------------------------------------
+ENTRY(cpu_init_crit)
+        /*
+         * Jump to board specific initialization...
+         * The Mask ROM will have already initialized
+         * basic memory. Go here to bump up clock rate and handle
+         * wake up conditions.
+         */
+        b       lowlevel_init           @ go setup pll,mux,memory 函数在lowlevel_init.S
+ENDPROC(cpu_init_crit)
+---------------------------------------------------------
+
+        bl      _main
+
+bl      _main					@跳到_main函数处。
+								@start.S里调用的函数格式都是：
+								@	ENTRY(abcd)
+								@	...
+								@	ENDPROC(abcd)
+								@所以全局搜索：grep -rns "ENTRY(_main)" *
+								@
+								@crt0_64.S:59:ENTRY(_main)            for arm
+								@crt0.S:58:ENTRY(_main)               for aarch64
+								@都在：arch/arm/lib下
+打开crt0.S看一眼，为C语言的运行，设置栈，和一些硬件的初始化。
+具体的函数不分析，porting的时候要逐条体会。
+
+在_main里的中间有一条指令：
+	b       relocate_code
+这里做了很多工作，其中就有Copy u-boot from flash to RAM
+	
+最后一条指令：
+	b	board_init_r
+grep -rns "board_init_r" * 找到board_init_r
+在arch/arm/lib/board.c +514 这段函数需要仔细分析。
+
+最主要的函数：
+        for (;;) {
+                main_loop();		@在common/main.c
+        }
+
+void main_loop(void)
+{
+	...
+	#ifdef CONFIG_BOOTDELAY
+		process_boot_delay();		@倒计时内是否有空格按下。没有就启动内核。
+	#endif
+
+	/*如果有空格按下，进入uboot 等待指令循环*/
+	for (;;) {
+		len = readline (CONFIG_SYS_PROMPT);
+
+		flag = 0;       /* assume no special flags for now */
+		if (len > 0)
+			strcpy (lastcommand, console_buffer);
+		else if (len == 0)
+			flag |= CMD_FLAG_REPEAT;
+		#ifdef CONFIG_BOOT_RETRY_TIME
+		else if (len == -2) {
+			/* -2 means timed out, retry autoboot*/
+			puts ("\nTimed out waiting for command\n");
+			# ifdef CONFIG_RESET_TO_RETRY
+				/* Reinit board to run initialization code again */
+				do_reset (NULL, 0, 0, NULL);
+			# else
+				return;         /* retry autoboot */
+			# endif
+		}
+		#endif
+		
+		if (len == -1)
+			puts ("<INTERRUPT>\n");
+		else
+			rc = run_command(lastcommand, flag);	//其他的都是废话这行是关键。
+	}
+}
+看，main_loop关键的两件事：1.倒计时，是否有空格按下。没有空格按下，启动内核。
+							2.有空格按下，等待输入，解析输入的cmd，运行输入的cmd。
+以上就是我们进uboot所看到的。
+
+------------------------------------------------------------------------------------
+下面会分析两部分：
+1.各个命令是如何运行的。以及如何添加命令。
+2.如何启动内核。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------
+GPIO明天分析。
+
+#define IMX_GPIO_NR(port, index)	((((port)-1)*32)+((index)&31))
+
+4,9
+96+（1001 & 0001 1111）= 96 + 0001 1001=96+25 =121
+
+
+在autoconf.mk中
+	CONFIG_MX6=y
+	CONFIG_MXC_GPIO=y
+所以：在drive/gpio/Makefile有：
+	obj-$(CONFIG_MXC_GPIO)  += mxc_gpio.o
+在drive/gpio/mxc_gpio.c用到。
+
+static unsigned long gpio_ports[] = {
+        [0] = GPIO1_BASE_ADDR,
+        [1] = GPIO2_BASE_ADDR,
+        [2] = GPIO3_BASE_ADDR,
+#if defined(CONFIG_MX25) || defined(CONFIG_MX27) || defined(CONFIG_MX51) || \
+                defined(CONFIG_MX53) || defined(CONFIG_MX6)
+        [3] = GPIO4_BASE_ADDR,
+#endif
+#if defined(CONFIG_MX27) || defined(CONFIG_MX53) || defined(CONFIG_MX6)
+        [4] = GPIO5_BASE_ADDR,
+        [5] = GPIO6_BASE_ADDR,
+#endif
+#if defined(CONFIG_MX53) || defined(CONFIG_MX6)
+        [6] = GPIO7_BASE_ADDR,
+#endif
+};
