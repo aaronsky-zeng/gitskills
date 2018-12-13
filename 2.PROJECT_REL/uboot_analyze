@@ -302,6 +302,7 @@ bl      _main					@跳到_main函数处。
 	b	board_init_r
 grep -rns "board_init_r" * 找到board_init_r
 在arch/arm/lib/board.c +514 这段函数需要仔细分析。
+提问：board.c是如何调用到board/freescale/mx6xxxx/mx6xxxx.c中的函数的。
 
 最主要的函数：
         for (;;) {
@@ -370,13 +371,6 @@ void main_loop(void)
 
 
 ---------------------------------------------------------------------------
-GPIO明天分析。
-
-#define IMX_GPIO_NR(port, index)	((((port)-1)*32)+((index)&31))
-
-4,9
-96+（1001 & 0001 1111）= 96 + 0001 1001=96+25 =121
-
 
 在autoconf.mk中
 	CONFIG_MX6=y
@@ -384,6 +378,28 @@ GPIO明天分析。
 所以：在drive/gpio/Makefile有：
 	obj-$(CONFIG_MXC_GPIO)  += mxc_gpio.o
 在drive/gpio/mxc_gpio.c用到。
+
+#define AIPS1_ARB_BASE_ADDR             0x02000000
+
+#define ATZ1_BASE_ADDR              AIPS1_ARB_BASE_ADDR
+
+#define AIPS1_OFF_BASE_ADDR         (ATZ1_BASE_ADDR + 0x80000)
+
+#define GPIO1_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x1C000)		//0x0209C000
+			GPIO1_DR	   0x0209C000
+			GPIO1_GDIR     0x0209C004
+			GPIO1_PSR      0x0209C008
+			GPIO1_ICR1     0x0209C00C 
+			GPIO1_ICR2     0x0209C010
+			GPIO1_IMR      0x0209C014
+			GPIO1_ISR      0x0209C018
+			GPIO1_EDGE_SEL 0x0209C01C
+#define GPIO2_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x20000)		//0x020a0000
+#define GPIO3_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x24000)		//0x020a4000
+#define GPIO4_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x28000)		//0x020a8000
+#define GPIO5_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x2C000)		//0x020ac000
+#define GPIO6_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x30000)		//0x020B0000
+#define GPIO7_BASE_ADDR             (AIPS1_OFF_BASE_ADDR + 0x34000)		//0x020b4000
 
 static unsigned long gpio_ports[] = {
         [0] = GPIO1_BASE_ADDR,
@@ -401,3 +417,78 @@ static unsigned long gpio_ports[] = {
         [6] = GPIO7_BASE_ADDR,
 #endif
 };
+
+#define RDC_CHECK(x) 0
+#define RDC_SPINLOCK_UP(x)
+#define RDC_SPINLOCK_DOWN(x)
+
+
+#define GPIO_TO_PORT(n)         (n / 32)
+	/*    (0--31)     PORT0
+	*     (32--63)    PORT1
+	*     (64--95)    PORT2
+	*     (96--127)   PORT3
+	*     (128--159)  PORT4
+	*     (160--191)  PORT5
+	*     (192--223)  PORT6
+	*/
+
+
+	一共有7个port: port[0-6]
+	每个port有32个gpio: gpio[0-31]
+	下面分析过程中，如果gpio=99，计算一下，就是port[3],gpio[3]
+	                    如果gpio=127，         port[3],gpio[31]
+					
+static int mxc_gpio_direction(unsigned int gpio,        //例如：gpio=99，
+        enum mxc_gpio_direction direction)                      gpio = 127，
+{
+        unsigned int port = GPIO_TO_PORT(gpio);         //port = 3
+        struct gpio_regs *regs;                           port = 3
+        u32 l;
+
+        gpio &= 0x1f;                                   //gpio = 0110 0011 & 0001 1111 = 0000 0011 = 3
+                                                        //gpio = 0111 1111 & 0001 1111 = 0001 1111 = 31
+														
+        regs = (struct gpio_regs *)gpio_ports[port];    //regs = gpio_ports[3] = GPIO4_BASE_ADDR = 0x020a8000
+
+		/*以下是算法核心，设置gpio输入输出方向*/
+        l = readl(&regs->gpio_dir);                     
+
+        switch (direction) {
+        case MXC_GPIO_DIRECTION_OUT:
+                l |= 1 << gpio;
+                break;
+        case MXC_GPIO_DIRECTION_IN:
+                l &= ~(1 << gpio);
+        }
+        writel(l, &regs->gpio_dir);
+
+        return 0;
+}
+
+-------------------------------arm/include/asm/imx-common/gpio.h----------------------------------------------
+#ifndef __ASM_ARCH_IMX_GPIO_H
+#define __ASM_ARCH_IMX_GPIO_H
+
+#if !(defined(__KERNEL_STRICT_NAMES) || defined(__ASSEMBLY__))
+/* GPIO registers */
+struct gpio_regs {
+        u32 gpio_dr;    /* data */
+        u32 gpio_dir;   /* direction */
+        u32 gpio_psr;   /* pad satus */
+};
+#endif
+
+#define IMX_GPIO_NR(port, index)                ((((port)-1)*32)+((index)&31))
+
+#endif
+----------------------------------------------------------------------------------------
+解释：
+#define IMX_GPIO_NR(port, index)	((((port)-1)*32)+((index)&31))
+
+	  (port-1)*2^5    + (index & 0001 1111) 
+	= (port-1)左移5位 + (index & 0001 1111) 
+		假设port = 4 = 0b0100, index = 9 = 0b1001    (第4个端口，第9个pin脚 )
+	那么上面的 = 0110 0000 + 00001001 = 011 01001
+	前三位表示端口号[0-6],后5位表示管脚数[0-31]
+
