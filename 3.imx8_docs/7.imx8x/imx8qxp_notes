@@ -1,0 +1,187 @@
+1.编译：
+
+repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-sumo -m imx-4.14.78-1.0.0_ga.xml  --repo-url=https://mirrors.tuna.tsinghua.edu.cn/git/git-repo
+
+repo sync
+
+DISTRO=fsl-imx-wayland MACHINE=imx8qxpmek source fsl-setup-release.sh -b imx8qxpmek_wayland
+
+bitbake fsl-image-validation-imx
+
+2.
+编译成功后的输出是：
+/home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/tmp/deploy/images/imx8qxpmek/目录下：
+    fsl-image-validation-imx-imx8qxpmek.sdcard.bz2
+        -> fsl-image-validation-imx-imx8qxpmek-20190114071748.rootfs.sdcard.bz2
+    (sdcard镜像，解压后可以直接烧写)
+
+    fsl-image-validation-imx-imx8qxpmek.tar.bz2
+        -> fsl-image-validation-imx-imx8qxpmek-20190114071748.rootfs.tar.bz2 (rootfs压缩包)
+
+    u-boot-sd-2018.03-r0.bin  (uboot)
+    imx-boot-tools/ mx8qx-mek-scfw-tcm.bin (sc firmware)
+    imx-boot-tools/ bl31-imx8qxp.bin  (ATF)
+    imx-boot-tools/mx8qx-ahab-container.img (seco HAB container仅有镜像)
+
+3.
+烧写SD卡镜像 
+    bunzip2 -dk -f  fsl-image-validation-imx-imx8qxpmek-20190114071748.rootfs.sdcard.bz2
+    sudo dd if=fsl-image-validation-imx-imx8qxpmek-20190114071748.rootfs.sdcard of=/dev/sd<partition> bs=1M conv=fsync
+
+4.之后
+  编译sdk及安装
+  
+    bitbake fsl-image-validation-imx -c populate_sdk
+
+  在/home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/tmp/deploy/sdk/目录下：
+    fsl-imx-wayland-glibc-x86_64-fsl-image-validation-imx-aarch64-toolchain-4.14-sumo.sh
+
+运行安装这条脚本：
+  cd /home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/
+  mkdir sdk
+  
+  cd /home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/tmp/deploy/sdk/
+  ./fsl-imx-wayland-glibc-x86_64-fsl-image-validation-imx-aarch64-toolchain-4.14-sumo.sh
+
+输入安装sdk的目标目录(default: /opt/fsl-imx-fb/4.9.51-mx8-ga):
+  ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk
+You are about to install the SDK to "~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk". Proceed[Y/n]? Y
+
+  安装结束后，可以在以下目录找到安装的sdk及编译toolchain：
+    -------------------------------------------------------------------------
+    book@www.100ask.org:~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk$ ll
+      total 36
+      drwxr-xr-x 3 book book  4096 5月   6 13:59 ./
+      drwxrwxr-x 7 book book  4096 5月   6 13:50 ../
+      -rw-r--r-- 1 book book  4078 5月   6 13:55 environment-setup-aarch64-poky-linux
+      -rw-r--r-- 1 book book 13970 5月   6 13:55 site-config-aarch64-poky-linux
+      drwxr-xr-x 4 book book  4096 5月   6 11:25 sysroots/
+      -rw-r--r-- 1 book book   136 5月   6 13:55 version-aarch64-poky-linux  
+    -------------------------------------------------------------------------
+
+5.独立编译
+  编译SCfirmware
+  工作目录：/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1
+  源码目录：/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1/packages/imx-scfw-porting-kit/src/scfw_export_mx8qx_b0
+  工具链：export TOOLS=/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1/toolchain/
+
+  进入工作目录，然后编译：
+    make qx B=mek R=B0  (如果需要看串口调试信息就增加M=1参数，注意重新编译之前要make clean-qx一下)
+	编译结束打印为：
+	“
+	make qx B=mek R=B0 
+	Generating platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz.h
+	Generating platform/board/mx8qx_mek/dcd/dcd.h from platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz.h
+	Generating platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz_retention.h
+	Generating platform/board/mx8qx_mek/dcd/dcd_retention.h from platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz_retention.h
+	Compiling platform/drivers/pmic/fsl_pmic.c
+	Compiling platform/drivers/pmic/pf8100/fsl_pf8100.c
+	Compiling platform/board/mx8qx_mek/board.c
+	Compiling platform/board/board_common.c
+	Assembling platform/board/board.S
+	Linking build_mx8qx_b0/scfw_tcm.elf ....
+	Objcopy build_mx8qx_b0/scfw_tcm.bin ....
+	done.”
+
+6.独立编译
+  编译uboot: 另打开一个终端
+    cd ~/workstation_imx8qxp_yocto
+    mkdir manual_git
+    cd manual_git
+
+    mkdir uboot
+    cd uboot
+    git clone  https://source.codeaurora.org/external/imx/uboot-imx
+    cd uboot-imx
+    git tag
+      ....
+    rel_imx_4.14.78_1.0.0_ga
+      ...
+    git checkout rel_imx_4.14.78_1.0.0_ga
+    git status
+      HEAD detached at rel_imx_4.14.78_1.0.0_ga
+      nothing to commit, working directory clean
+
+    ls configs
+      …
+
+      imx8qxp_mek_defconfig
+      …
+  编译命令：
+    source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
+    make  imx8qxp_mek_defconfig
+    make 
+  编译log如下：
+    …
+    OBJCOPY u-boot.srec
+    OBJCOPY u-boot-nodtb.bin
+    start=$(aarch64-poky-linux-nm u-boot | grep __rel_dyn_start | cut -f 1 -d ' '); end=$(aarch64-poky-linux-nm u-boot | grep __rel_dyn_end | cut -f 1 -d ' '); tools/relocate-rela u-boot-nodtb.bin 0x80020000 $start $end
+    make[2]: `arch/arm/dts/fsl-imx8qxp-mek.dtb' is up to date.
+    CAT     u-boot-dtb.bin
+    COPY    u-boot.bin
+    SYM     u-boot.sym
+    LD      u-boot.elf
+    CHK     include/config.h
+    CFG     u-boot.cfg
+    CFGCHK  u-boot.cfg
+  编译结束后的输出镜像为： 
+    u-boot.bin
+    arch/arm/dts/fsl-imx8qxp-mek.dtb
+
+7.独立编译
+  编译Linux内核：
+    mkdir linux_kernel
+    cd linux_kernel
+    git clone  https://source.codeaurora.org/external/imx/linux-imx
+    cd linux-imx
+    git tag
+      ...
+      rel_imx_4.14.78_1.0.0_ga
+      ...
+    git checkout rel_imx_4.14.78_1.0.0_ga
+    git status
+      HEAD detached at rel_imx_4.14.78_1.0.0_ga
+  编译命令：
+    source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
+    make defconfig             #arch/arm64/configs/defconfig
+    LDFLAGS=""  CC="$CC"  make
+  编译结束后的输出镜像为：
+    arch/arm64/boot/dts/freescale/fsl-imx8qxp-mek.dtb
+    arch/arm64/boot/Image
+
+8.独立编译
+  编译ATF:
+    git clone https://source.codeaurora.org/external/imx/imx-atf
+    cd imx-atf
+    git tag
+      ...
+      rel_imx_4.14.78_1.0.0_ga
+      ...
+
+    git checkout rel_imx_4.14.78_1.0.0_ga
+    git status
+      HEAD detached at rel_imx_4.14.78_1.0.0_ga
+  编译命令：
+    source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
+    LDFLAGS=""  make PLAT=imx8qxp
+       编译log为：
+        …
+        LD      build/imx8qxp/release/bl31/bl31.elf
+        BIN     build/imx8qxp/release/bl31.bin
+        Built build/imx8qxp/release/bl31.bin successfully
+   编译结束后的输出镜像为：
+   ./build/imx8qxp/release/bl31.bin
+
+9.运行 imx-mkimage脚本生成 flash.bin镜像:
+  另打开一个终端，不要与编译uboot&kernel同用一个终端：
+  git clone https://source.codeaurora.org/external/imx/imx-mkimage
+  cd imx-mkimage
+  git tag
+    ...
+    rel_imx_4.14.78_1.0.0_ga
+    ...
+  git checkout rel_imx_4.14.78_1.0.0_ga
+  git status
+    HEAD detached at rel_imx_4.14.78_1.0.0_ga
+  imx-mkimage需要调用host PC的GCC工具，所以需要退出之前的terminal。重新进入，从而退出之前source的交叉编译变量。
+
