@@ -65,7 +65,7 @@ You are about to install the SDK to "~/workstation_imx8qxp_yocto/imx8qxp_yocto/i
   源码目录：/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1/packages/imx-scfw-porting-kit/src/scfw_export_mx8qx_b0
   工具链：export TOOLS=/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1/toolchain/
 
-  进入工作目录，然后编译：
+  进入源码目录，然后编译：
     make qx B=mek R=B0  (如果需要看串口调试信息就增加M=1参数，注意重新编译之前要make clean-qx一下)
 	编译结束打印为：
 	“
@@ -185,3 +185,19 @@ You are about to install the SDK to "~/workstation_imx8qxp_yocto/imx8qxp_yocto/i
     HEAD detached at rel_imx_4.14.78_1.0.0_ga
   imx-mkimage需要调用host PC的GCC工具，所以需要退出之前的terminal。重新进入，从而退出之前source的交叉编译变量。
 
+  cd imx-mkimage/
+  ls
+  git status
+  cd iMX8QX
+  ls
+  cp /home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/tmp/deploy/images/imx8qxpmek/mx8qx-ahab-container.img .
+
+  cp /home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1/packages/imx-scfw-porting-kit/src/scfw_export_mx8qx_b0/build_mx8qx_b0/scfw_tcm.bin  .
+  cp /home/book/workstation_imx8qxp_yocto/manual_git/atf/imx-atf/build/imx8qxp/release/bl31.bin .
+  cp /home/book/workstation_imx8qxp_yocto/manual_git/uboot/uboot-imx/u-boot.bin .
+ 
+  cd ..
+  make SOC=iMX8QX flash_b0
+ 
+  cd iMX8QX
+  ls
