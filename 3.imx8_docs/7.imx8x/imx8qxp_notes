@@ -83,6 +83,31 @@ You are about to install the SDK to "~/workstation_imx8qxp_yocto/imx8qxp_yocto/i
 	Objcopy build_mx8qx_b0/scfw_tcm.bin ....
 	done.”
 
+
+如果要debug，把log level 调高一点， 至少调到 3 
+
+    make qx B=mek R=B0 M=1 DL=3
+
+help :
+        @/bin/echo -e "Usage: make TARGET OPTIONS\n"
+        @/bin/echo -e "Targets:"
+        @/bin/echo -e "\thelp           : display help text"
+        @/bin/echo -e "\tclean          : remove all build files\n"
+        @/bin/echo -en $(HELP)
+        @/bin/echo -e "\nOptions:"
+        @/bin/echo -e "\tV=0            : quite output (default)"
+        @/bin/echo -e "\tV=1            : verbose output"
+        @/bin/echo -e "\tD=0            : configure for no debug"
+        @/bin/echo -e "\tD=1            : configure for debug (default)"
+        @/bin/echo -e "\tDL=<level>     : configure debug level (0-5)"
+        @/bin/echo -e "\tB=<board>      : configure board (default=val)"
+        @/bin/echo -e "\tDDR_CON=<file> : specify DDR config file"
+        @/bin/echo -e "\tR=<srev>       : silicon revision (default=A0)"
+        @/bin/echo -e "\tM=0            : no debug monitor (default)"
+        @/bin/echo -e "\tM=1            : include debug monitor"
+        @/bin/echo -e "\tT=<test>       : run tests rather than boot next core"
+        @/bin/echo -en $(HELP_OPT)
+
 6.独立编译
   编译uboot: 另打开一个终端
     cd ~/workstation_imx8qxp_yocto
