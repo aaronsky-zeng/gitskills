@@ -120,7 +120,7 @@ help :
     cd uboot-imx
     git tag
       ....
-    rel_imx_4.14.78_1.0.0_ga
+    rel_imx_4.14.78_1.0.0_ga           /*2019-07-11 rel_imx_4.14.98_2.0.0_ga 命令都不变*/
       ...
     git checkout rel_imx_4.14.78_1.0.0_ga
     git status
@@ -161,7 +161,7 @@ help :
     cd linux-imx
     git tag
       ...
-      rel_imx_4.14.78_1.0.0_ga
+      rel_imx_4.14.78_1.0.0_ga        /*2019-07-11 rel_imx_4.14.98_2.0.0_ga 命令都不变*/
       ...
     git checkout rel_imx_4.14.78_1.0.0_ga
     git status
@@ -180,7 +180,7 @@ help :
     cd imx-atf
     git tag
       ...
-      rel_imx_4.14.78_1.0.0_ga
+      rel_imx_4.14.78_1.0.0_ga          /*2019-07-11 rel_imx_4.14.98_2.0.0_ga */
       ...
 
     git checkout rel_imx_4.14.78_1.0.0_ga
@@ -189,6 +189,14 @@ help :
   编译命令：
     source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
     LDFLAGS=""  make PLAT=imx8qxp
+	----------------------------------------------------------------	
+	/*2019-07-11 rel_imx_4.14.98_2.0.0_ga 这里命令发生了改变。*/
+	LDFLAGS=""  make PLAT=imx8qx
+	在4.14.98：
+	/home/book/workstation_imx8qxp_yocto/manual_git/atf/imx-atf/plat/imx/imx8qx
+        在4.14.78：
+        /home/book/workstation_imx8qxp_yocto/manual_git/atf/imx-atf/plat/imx/imx8qxp
+	---------------------------------------------------------------
        编译log为：
         …
         LD      build/imx8qxp/release/bl31/bl31.elf
@@ -196,6 +204,16 @@ help :
         Built build/imx8qxp/release/bl31.bin successfully
    编译结束后的输出镜像为：
    ./build/imx8qxp/release/bl31.bin
+	-----------------------------------------------------------------
+	4.14.98 编译log为：
+	...
+	  AS      plat/common/aarch64/platform_helpers.S
+	  PP      bl31/bl31.ld.S
+	  LD      build/imx8qx/release/bl31/bl31.elf
+	  BIN     build/imx8qx/release/bl31.bin
+
+	  Built build/imx8qx/release/bl31.bin successfully
+	----------------------------------------------------------------
 
 9.运行 imx-mkimage脚本生成 flash.bin镜像:
   另打开一个终端，不要与编译uboot&kernel同用一个终端：
@@ -203,7 +221,7 @@ help :
   cd imx-mkimage
   git tag
     ...
-    rel_imx_4.14.78_1.0.0_ga
+    rel_imx_4.14.78_1.0.0_ga         /*2019-07-11 rel_imx_4.14.98_2.0.0_ga 命令都不变*/
     ...
   git checkout rel_imx_4.14.78_1.0.0_ga
   git status
