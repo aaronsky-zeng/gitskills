@@ -7,7 +7,10 @@ repo sync
 DISTRO=fsl-imx-wayland MACHINE=imx8qxpmek source fsl-setup-release.sh -b imx8qxpmek_wayland
 
 bitbake fsl-image-validation-imx
-
+---升级到4.14.98------------------------------------------------
+$ repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-sumo -m imx-4.14.98-2.0.0_ga.xml  --repo-url=https://mirrors.tuna.tsinghua.edu.cn/git/git-repo
+$ repo sync
+----------------------------------------------------
 2.
 编译成功后的输出是：
 /home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/tmp/deploy/images/imx8qxpmek/目录下：
