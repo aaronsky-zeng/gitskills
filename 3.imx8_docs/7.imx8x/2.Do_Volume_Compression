@@ -1,0 +1,30 @@
+整个yocto环境非常大，大约150G左右。
+如果出错每次重新编译都是一个繁琐的过程。
+
+将downloads目录存起来，便于之后的使用。
+准备将这个问题件上传到百度网盘，但是，百度网盘上传文件有大小的限制。
+
+所以决定将这个文件夹分卷压缩上传。
+(1)
+	$tar cvzf - downloads | split -d -b 2048m - downloadsdir
+	将downloads目录分卷压缩，每个2G大小，名称为downloadsdir**，其中**为数字，从00开始。
+
+输出的文件为 downloadsdir00，downloadsdir01，downloadsdir0,2 ...
+如果不加downloadsdir，则输出文件为 x00、x01、x02 ...
+如果不加参数 -d，则输出aa、ab、ac ...
+
+	downloads大小为26G，分卷压缩之后，如下：
+	
+book@AaronZeng:~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp$ ls
+downloads       downloadsdir01  downloadsdir03  downloadsdir05  downloadsdir07  downloadsdir09  downloadsdir11  fsl-setup-release.sh  linux分卷压缩  README-IMXBSP      sources
+downloadsdir00  downloadsdir02  downloadsdir04  downloadsdir06  downloadsdir08  downloadsdir10  downloadsdir12  imx8qxpmek_wayland    README         setup-environment
+
+(2)
+下载下来如何使用呢？
+
+首先将分卷包合并
+cat downloadsdir* > downloads.tar.gz
+然后解压
+tar xzvf downloads.tar.gz
+
+OK.....
