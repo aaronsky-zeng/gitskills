@@ -176,7 +176,14 @@ help :
   编译结束后的输出镜像为：
     arch/arm64/boot/dts/freescale/fsl-imx8qxp-mek.dtb
     arch/arm64/boot/Image
+-----------------插入dtb反汇编到dts的内容----------------------------
+	source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
 
+	cd /home/book/workstation_imx8qxp_yocto/manual_git/linux_kernel/linux-imx/arch/arm64/boot/dts/freescale/
+
+	/home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/sysroots/x86_64-pokysdk-linux/usr/bin/dtc -I dtb -O dts -o all.dts fsl-imx8qxp-mek.dtb
+	//将fsl-imx8qxp-mek.dtb反汇编为all.dts
+--------------------------------------------------------------------
 8.独立编译
   编译ATF:
     git clone https://source.codeaurora.org/external/imx/imx-atf
