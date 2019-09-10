@@ -85,7 +85,30 @@ You are about to install the SDK to "~/workstation_imx8qxp_yocto/imx8qxp_yocto/i
 	Linking build_mx8qx_b0/scfw_tcm.elf ....
 	Objcopy build_mx8qx_b0/scfw_tcm.bin ....
 	done.”
+	--------------------------------------------------imx-scfw-porting-kit-1.2----------------------------------------------------------
+	源码目录：/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.2/packages/imx-scfw-porting-kit-1.2/src/scfw_export_mx8qx_b0
+	工具链：  export TOOLS=/home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.2/toolchain
+	
+	进入源码目录，然后编译：
+	make qx B=mek R=B0 (如果需要看串口调试信息就增加M=1 参数，U=2 表示使用SCU 本身串口，注意重新编译之前要make clean-qx 一下)
+	编译结束打印为：
+	make qx B=mek R=B0 M=1 U=2 DL=3
+	Generating platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz.h
+	Generating platform/board/mx8qx_mek/dcd/dcd.h from platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz.h
+	Generating platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz_retention.h
+	Generating platform/board/mx8qx_mek/dcd/dcd_retention.h from
+	platform/board/mx8qx_mek/dcd/imx8qx_dcd_1.2GHz_retention.h
+	Compiling platform/drivers/pmic/fsl_pmic.c
+	Compiling platform/drivers/pmic/pf8100/fsl_pf8100.c
+	Compiling platform/drivers/pmic/pf100/fsl_pf100.c
+	Compiling platform/board/mx8qx_mek/board.c
+	Compiling platform/board/board_common.c
+	Compiling platform/board/pmic.c
+	Linking build_mx8qx_b0/scfw_tcm.elf ....
+	Objcopy build_mx8qx_b0/scfw_tcm.bin ....
+	done.
 
+	---------------------------------------------------------------------------------------------------------------------
 
 如果要debug，把log level 调高一点， 至少调到 3 
 
@@ -246,6 +269,9 @@ help :
   cp /home/book/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/tmp/deploy/images/imx8qxpmek/mx8qx-ahab-container.img .
 
   cp /home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.1.1/packages/imx-scfw-porting-kit/src/scfw_export_mx8qx_b0/build_mx8qx_b0/scfw_tcm.bin  .
+  -----------------------------------------------scfw-1.2------------------------
+  cp /home/book/workstation_imx8qxp_yocto/SCU/imx-scfw-porting-kit-1.2/packages/imx-scfw-porting-kit-1.2/src/scfw_export_mx8qx_b0/build_mx8qx_b0/scfw_tcm.bin .
+  ------------------------------------------------------------------------------
   cp /home/book/workstation_imx8qxp_yocto/manual_git/atf/imx-atf/build/imx8qxp/release/bl31.bin .
   cp /home/book/workstation_imx8qxp_yocto/manual_git/uboot/uboot-imx/u-boot.bin .
  
