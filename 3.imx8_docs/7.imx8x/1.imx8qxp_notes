@@ -188,7 +188,7 @@ help :
     git tag
       ...
       rel_imx_4.14.78_1.0.0_ga        /*2019-07-11 rel_imx_4.14.98_2.0.0_ga 命令都不变*/
-										/*2020-03-18 rel_imx4.19.35.1.1.0 命令不变*/
+										/*2020-03-18 rel_imx4.19.35.1.1.0 下文更新*/
       ...
     git checkout rel_imx_4.14.78_1.0.0_ga
     git status
@@ -289,3 +289,46 @@ help :
  
   cd iMX8QX
   ls
+
+
+------------------------2020-03-18  rel_imx_4.19.35_1.1.0-------------
+	git clone  https://source.codeaurora.org/external/imx/linux-imx
+	cd linux-imx
+	git tag
+      ...
+      rel_imx_4.19.35-1.1.0
+      ...
+    git checkout rel_imx_4.14.78_1.0.0_ga  (不要加-b，文档里错误)
+		---------------------------
+		book@AaronZeng:~/workstation_imx8qxp_yocto/manual_git/linux_kernel/linux-imx-4.19.35/linux-imx$ git branch
+		* (HEAD detached at rel_imx_4.19.35_1.1.0)
+		  master
+		-----------------------------
+
+
+$ source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
+
+$ echo $LDFLAGS
+-Wl,-O1 -Wl,--hash-style=gnu -Wl,--as-needed
+$ unset LDFLAGS // Remove env variable LDFLAGS
+
+$ echo $ARCH
+arm64
+$ echo $CROSS_COMPILE
+aarch64-poky-linux-
+
+编译命令：
+$ make distclean 	// delete all generated files
+$ make defconfig 	// configuration for i.MX 8,#arch/arm64/configs/defconfig
+
+$ make -j $(nproc) 	// -j: number of simulatneous jobs
+					// use available Host CPUs for number
+					// my machine is 4
+
+$ Linux kernel generated files in directory arch/arm64/boot 
+dts
+Image
+Image.gz
+install.sh
+Makefile
+
