@@ -298,7 +298,7 @@ help :
       ...
       rel_imx_4.19.35-1.1.0
       ...
-    git checkout rel_imx_4.14.78_1.0.0_ga  (不要加-b，文档里错误)
+    git checkout rel_imx_4.19.35-1.1.0  (不要加-b，文档里错误)
 		---------------------------
 		book@AaronZeng:~/workstation_imx8qxp_yocto/manual_git/linux_kernel/linux-imx-4.19.35/linux-imx$ git branch
 		* (HEAD detached at rel_imx_4.19.35_1.1.0)
