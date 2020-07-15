@@ -1,0 +1,11 @@
+(1) 更新uboot
+cd /home/book/workstation_imx8qxp_yocto/manual_git/uboot/uboot-imx
+git checkout -- board/freescale/mx6sabresd/mx6q_4x_mt41j128.cfg
+//取消文件的修改。
+
+git checkout master
+git pull
+
+git tag | grep rel_imx_5.4
+
+(2)
