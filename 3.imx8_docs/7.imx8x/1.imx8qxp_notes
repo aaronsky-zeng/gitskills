@@ -305,6 +305,19 @@ help :
 		  master
 		-----------------------------
 
+-------------------------2020-06-15   rel_imx_4.14.98_2.3.0 ----------
+在原来的rel_imx_4.14.98_2.0.0目录下：
+git checkout master 
+git pull		//更新源码
+git tag
+	...
+	rel_imx_4.14.98_2.3.0
+	...
+git checkout rel_imx_4.14.98_2.3.0
+git branch
+	* (HEAD detached at rel_imx_4.14.98_2.3.0)
+	master
+---------------------------------
 
 $ source ~/workstation_imx8qxp_yocto/imx8qxp_yocto/imx-yocto-bsp/imx8qxpmek_wayland/sdk/environment-setup-aarch64-poky-linux
 
