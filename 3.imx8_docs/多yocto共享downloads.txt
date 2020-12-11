@@ -1,0 +1,9 @@
+如果有多个yocto，共享downloads：
+将之前的yocto下的downloads都copy到/home/aaron/Downloads/yocto_downloads/这个目录下。
+举个例子：
+	cd /home/aaron/workstation_imx8mm_yocto/5.4.24-2.1.0/build-xwayland/conf
+	vim local.conf
+
+	修改：DL_DIR ?= "/home/aaron/Downloads/yocto_downloads/"
+
+  这里要绝对路径。

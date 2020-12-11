@@ -1,0 +1,52 @@
+
+
+
+repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-zeus -m imx-5.4.24-2.1.0.xml  
+repo sync
+DISTRO=fsl-imx-xwayland MACHINE=imx8mmevk source imx-setup-release.sh -b build-xwayland
+编译最小的yocto：
+	bitbake core-image-minimal
+
+编译SDK：
+	bitbake core-image-minimal -c populate_sdk
+	
+需要重新编译时，引入bitbake环境：
+	source setup-environment build-xwayland
+	
+
+在yocto中找源码：
+aaron@ubuntu:~/workstation/imx8m_yocto_bsp$ source setup-environment build-xwayland
+
+aaron@ubuntu:~/workstation/imx8m_yocto_bsp/build-wayland$ bitbake -e u-boot | grep "^S="
+S="/home/aaron/workstation/imx8m_yocto_bsp/build-wayland/tmp/work/imx8mqevk-poky-linux/u-boot-imx/2017.03-r0/git"
+
+
+
+bitbake -e virtual/kernel | grep "^S="
+S="/xxxxx/build-xwayland/tmp/work/imx8qmmek-poky-linux/linux-imx/4.9.51-r0/git"
+
+	
+	
+
+单独clone uboot，kernel:
+mkdir uboot
+cd uboot
+git clone https://source.codeaurora.org/external/imx/uboot-imx
+cd uboot-imx
+git tag |grep rel_imx_5.4
+....
+rel_imx_5.4.24_2.1.0
+...
+git checkout rel_imx_5.4.24_2.1.0
+
+
+
+mkdir linux
+cd linux
+git clone https://source.codeaurora.org/external/imx/linux-imx
+cd linux-imx
+git tag |grep rel_imx_5.4
+...
+rel_imx_5.4.24_2.1.0
+...
+git checkout rel_imx_5.4.24_2.1.0
